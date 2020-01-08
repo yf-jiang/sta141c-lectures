@@ -5,7 +5,7 @@
 - Instructor: Randy Lai (rcslai@ucdavis.edu)
 - Meeting time: 12:10 - 1:30 PM, TR
 - Location: WELLMN 216
-- Office hour: Tuesday and Wednesday 2:00 - 3:00pm (or by appointment)
+- Office hour: MSB 4111 Tuesday and Wednesday 2:00 - 3:00pm (or by appointment)
 
 - TA: Si Teng Hao (ssthao@ucdavis.edu)
 - Meeting time: 9:00 - 9:50 AM, W or 11:00 - 11:50 AM, W
