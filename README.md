@@ -9,7 +9,7 @@
 
 - TA: Si Teng Hao (ssthao@ucdavis.edu)
 - Meeting time: 9:00 - 9:50 AM, W or 11:00 - 11:50 AM, W
-- Office hour: to be announced
+- Office hour: MSB 1117 Friday 10am - 12pm
 
 
 ## Material
