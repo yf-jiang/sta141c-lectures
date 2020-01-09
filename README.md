@@ -36,7 +36,7 @@ Tentative Schedule:
 | 2      | Tidy data and Functional programming |
 | 3      | Debugging and profiling              |
 | 4      | Writing C and C++ extensions         |
-| 5      | Multitasking                         |
+| 5      | Parallel Computing                   |
 | 6      | Databases and SQL                    |
 | 7      | Writing an R package                 |
 | 8      | Interoperate with python             |
