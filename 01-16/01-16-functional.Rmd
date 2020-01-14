@@ -1,0 +1,139 @@
+---
+title: "Functional programming in R"
+date: "01-14-2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+You'll learn some of the powerful programming tools provided by `purrr`, one of the tidyverse core packages.
+
+```{r, message = FALSE}
+library(tidyverse)
+```
+
+## Is R a functional language?
+
+> R, at its heart, is a functional programming language. This means that it provides many tools for the creation and manipulation of functions.
+
+
+Everything in R is function
+
+```{r}
+x <- 1
+y <- 2
+x + y
+`+`(x, y)
+
+a <- 3:5
+a[3]
+`[`(a, 3)
+
+z <- 1
+`<-`(z, 1)
+
+for (i in 1:10) print(i)
+`for`(i, 1:10, print(i))
+```
+
+```{r}
+add <- function(x, y) x + y
+add(3, 1)
+
+body(add) <- quote(x - y)
+add(3, 1)
+```
+
+## Revisit for loops
+
+Suppose we want to compute the sample medians for each column of the data frame
+
+```{r}
+df <- tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+```
+
+A naive way to do so
+```{r}
+median(df$a)
+median(df$b)
+median(df$c)
+median(df$d)
+```
+
+```{r}
+# a base R for loop
+output <- vector("double", ncol(df))  # 1. output
+for (i in seq_along(df)) {            # 2. sequence
+  output[[i]] <- median(df[[i]])      # 3. body
+}
+output
+```
+
+Sometimes we would like to modify existing objects
+
+```{r}
+rescale01 <- function(x) {
+  rng <- range(x, na.rm = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+
+df$a <- rescale01(df$a)
+df$b <- rescale01(df$b)
+df$c <- rescale01(df$c)
+df$d <- rescale01(df$d)
+
+# or simply
+for (i in seq_along(df)) {
+  df[[i]] <- rescale01(df[[i]])
+}
+```
+
+## For loops vs functionals
+
+The pattern of looping over a vector, doing something to each element and saving the results is so common that the `purrr` package provides a family of functions to do it for you.
+
+
+- `map()` makes a list.
+- `map_lgl()` makes a logical vector.
+- `map_int()` makes an integer vector.
+- `map_dbl()` makes a double vector.
+- `map_chr()` makes a character vector.
+
+
+```{r}
+map_dbl(df, median)
+df %>% map_dbl(median)
+```
+
+
+```{r}
+# pass additional arguments
+map_dbl(df, mean, trim = 0.5)
+```
+
+```{r}
+# preserve names
+z <- list(x = 1:3, y = 4:5)
+map_int(z, length)
+```
+
+
+```{r}
+(models <- mtcars %>% 
+  group_split(cyl) %>% 
+  map(function(df) lm(mpg ~ wt, data = df)))
+
+# or simply
+(models <- mtcars %>% 
+  group_split(cyl) %>% 
+  map(~lm(mpg ~ wt, data = .)))
+```
+
+# References
+
+- R for Data Science https://r4ds.had.co.nz/iteration.html
