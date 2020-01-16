@@ -214,6 +214,7 @@ flights %>% transmute(
 
 ### Six variations on ranking functions
 
+- `rank`: the ordinary rank function
 - `row_number`: equivalent to `rank(ties.method = "first")`
 - `min_rank`: equivalent to `rank(ties.method = "min")`
 - `dense_rank`: like `min_rank()`, but with no gaps between ranks
@@ -225,7 +226,7 @@ flights %>% transmute(
 some_data <- tibble(
   x = c(3, 4, 1, 3, 1)
 )
-some_data %>% mutate(row_number(), row_number(x), min_rank(x), percent_rank(x))
+some_data %>% mutate(rank(x), row_number(x), min_rank(x), percent_rank(x))
 ```
 
 ### `lead` and `lag`
@@ -235,6 +236,7 @@ some_data2 <- tibble(
   time = 1:5,
   value = c(3, 4, 1, 3, 1)
 )
+
 some_data2 %>% mutate(diff1 = value - lag(value), diff2 = lead(value) - value)
 ```
 
@@ -269,9 +271,9 @@ flight_distances %>% mutate(distance_type = recode(distance_type,
 ```{r}
 some_data %>% mutate(
   y = recode(x,
-    `1` = "one",
-    `3` = "three",
-    `4` = "four"
+    `1` = "disagree",
+    `3` = "netural",
+    `4` = "slightly agree"
   )
 )
 ```
@@ -312,6 +314,9 @@ flights %>%
     planes = n_distinct(tailnum),
     flights = n()
   )
+```
+
+```{r}
 
 # group multiple variables
 
@@ -320,12 +325,11 @@ flights %>%
   summarize(flights = n()))
 
 (per_month <- per_day %>% 
-  summarize(flights = sum(flights)))
+    summarize(flights = sum(flights)))
 
 (per_year <- per_month %>%
   summarize(flights = sum(flights)))
 ```
-
 
 ## Other useful functions
 
@@ -334,6 +338,7 @@ flights %>% glimpse()
 flights %>% sample_n(5)
 ## rows with smallest values of air_time with the original order preserved
 flights %>% top_n(3, air_time)
+
 ```
 
 ## Some variations of verbs
@@ -413,7 +418,7 @@ library(tidyr)
 `pivot_longer` is the replacement for `gather()` and `pivot_wider()` is the replacement for `spread()`.
 Both are designed to be simpler and can handle more cases than gather and spread.
 
-### Privot longer
+### Pivot longer
 
 ```{r}
 relig_income %>%
@@ -433,7 +438,7 @@ billboard %>%
   )
 ```
 
-### Privot wider
+### Pivot wider
 
 ```{r}
 fish_encounters %>% pivot_wider(
