@@ -1,0 +1,281 @@
+---
+title: "Handling Conditions in R"
+date: "01-23-2020"
+output:
+  pdf_document: default
+  html_document: default
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+
+# Conditions
+
+There are three conditions that you can signal in code: errors, warnings, and messages.
+
+- Errors are the most severe; they indicate that there is no way for a function to continue and execution must stop.
+
+- Warnings fall somewhat in between errors and message, and typically indicate that something has gone wrong but the function has been able to at least partially recover.
+
+- Messages are the mildest; they are way of informing users that some action has been performed on their behalf.
+
+
+Actually, there is one more condition called SIGINT which interrupts execution by pressing `Escape`, `Ctrl + Break`, or `Ctrl + C` (depending on the platform).
+
+
+```{r, error = TRUE}
+stop("This is what an error looks like")
+#> Error in eval(expr, envir, enclos): This is what an error looks like
+
+warning("This is what a warning looks like")
+#> Warning: This is what a warning looks like
+
+message("This is what a message looks like")
+#> This is what a message looks like
+```
+
+
+## Errors
+
+
+```{r, error = TRUE}
+f <- function() g()
+g <- function() h()
+h <- function() stop("This is an error!")
+
+f()
+```
+
+Without the call information.
+
+```{r, error = TRUE}
+h <- function() stop("This is an error!", call. = FALSE)
+f()
+```
+
+## Warnings
+
+```{r}
+fw <- function() {
+  cat("1\n")
+  warning("W1")
+  cat("2\n")
+  warning("W2")
+  cat("3\n")
+  warning("W3")
+}
+```
+
+By default, warnings are cached and printed only when control returns to the top level.
+
+```{r}
+fw()
+```
+The behavior could be controled by the `warn` option.
+
+- The default behaviour with `options(warn = 0)`
+- To make warnings appear immediately, set `options(warn = 1)`
+- To turn warnings into errors, set `options(warn = 2)`
+
+```{r}
+log(-1)
+
+file.remove("this-file-doesn't-exist")
+```
+
+## Messages
+
+```{r}
+fm <- function() {
+  cat("1\n")
+  message("M1")
+  cat("2\n")
+  message("M2")
+  cat("3\n")
+  message("M3")
+}
+
+fm()
+```
+
+When start a long running progress, it may be a better idea to use `progress_bar` that `message`.
+
+```{r, eval = FALSE}
+for (i in 1:5) {
+  message("tick")
+  Sys.sleep(1)
+}
+```
+
+```{r, eval = FALSE}
+library(progress)
+pb <- progress_bar$new(total = 5)
+for (i in 1:5) {
+  pb$tick()
+  Sys.sleep(1)
+}
+```
+
+It’s important to compare `message()` with `cat()`. At the first glance, they may look similar.
+
+```{r}
+cat("hello\n")
+message("hello")
+```
+
+However, they are piped to different channels. For instance, `capture.output` cannot be used to capture `message`.
+
+```{r}
+capture.output(cat("hello\n"))
+
+capture.output(message("hello"))
+```
+
+## Ignoring conditions
+The simplest way of handling conditions in R is to simply ignore them:
+
+- Ignore errors with try().
+- Ignore warnings with suppressWarnings().
+- Ignore messages with suppressMessages().
+
+```{r}
+f2 <- function(x) {
+  try(log(x))
+  10
+}
+# the error message will be displayed but execution will continue
+f2("a")
+# `try` doesn't catch `warnings`.
+f2(-1)
+```
+
+
+```{r}
+suppressWarnings({
+  warning("Uhoh!")
+  warning("Another warning")
+  1
+})
+
+suppressMessages({
+  message("Hello there")
+  2
+})
+
+suppressWarnings({
+  message("You can still see me")
+  3
+})
+```
+
+
+## Handling conditions
+
+- Use `tryCatch` to handle errors, warnings and messges
+- Use `withCallingHandlers` to handle warnings and messages
+
+```{r}
+tryCatch(
+  error = function(cnd) {
+    # code to run when error is thrown
+    message("we got an error")
+    5
+  },
+  log("a")
+)
+```
+
+```{r}
+tryCatch(
+  warning = function(cnd) {
+    # code to run when message is signalled
+    message("we got a warning")
+    5
+  },
+  log(-1)
+)
+```
+
+```{r}
+withCallingHandlers(
+  warning = function(cnd) {
+    # code to run when message is signalled
+    message("we got a warning")
+    5  # is not used
+  },
+  log(-1)
+)
+```
+
+
+```{r}
+tryCatch(
+  message = function(cnd) {
+    message("hi")
+    5
+  },
+  message("hello")
+)
+```
+
+
+```{r}
+withCallingHandlers(
+  message = function(cnd) {
+    message("hi")
+    5  # is not used
+  },
+  message("hello")
+)
+```
+
+## The condition object `cnd`
+
+In the above examples, there is an object `cnd` in the handler. You might wonder what it is.
+
+```{r}
+(cnd <- tryCatch(
+  error = function(cnd) {
+    # return cnd
+    cnd
+  },
+  log("a")
+))
+```
+
+```{r}
+str(cnd)
+```
+
+```{r}
+# the error message
+conditionMessage(cnd)
+# if you want to re-evaluate the call
+eval(conditionCall(cnd))
+```
+
+## Finally, the `finally` handler
+
+`finally` expression is always execulated.
+
+```{r}
+path <- tempfile()
+tryCatch(
+  error = function(cnd) {
+    message("we got a error: ", conditionMessage(cnd))
+  },
+  finally = {
+    file.remove(path)
+  },
+  cat(a, file = path)
+)
+```
+
+
+
+# Reference
+
+Advanced R Chapter 8 https://adv-r.hadley.nz/debugging.html
