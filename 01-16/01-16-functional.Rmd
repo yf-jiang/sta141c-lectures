@@ -154,7 +154,7 @@ c(9, 16, 25) %>% map(sqrt)
 
 fab_norm <- function(p) {
   x <- c(1, 1, 2, 3, 5, 8)
-  (sum(x^p))^(1/p)
+  (sum(abs(x)^p))^(1/p)
 }
 
 fab_norm(1)
@@ -226,7 +226,8 @@ mtcars %>%
   map_dbl("r.squared")
 ```
 
-## Map more than one arguments
+
+## Map more than one argument
 
 Two arguments
 ```{r}
@@ -243,11 +244,12 @@ map2(a, b, function(x, y) choose(x, y))
 
 More than two arguments
 ```{r}
-l <- list(a = c(1, 2, 3), 
-     b = c(5, 4, 8), 
-     c = c(4, 7, 9))
+l <- list(
+      a = c(1, 2, 3), 
+      b = c(5, 4, 8), 
+      c = c(4, 7, 9))
 
-l %>% pmap(function(c, b, a) a / (b + c))
+l %>% pmap(function(a, b, c) a / (b + c))
 # or equivalently
 l %>% pmap(~ ..1 / (..2 + ..3))
 ```
@@ -258,8 +260,10 @@ l %>% pmap(~ ..1 / (..2 + ..3))
 
 ```{r}
 a <- c(11, 12, 13)
-b <- c(1, 2, 3)
+b <- c(4, 5, 6)
 a %>% imap_dbl(~ .x + b[.y])
+# equivalently
+a %>% imap_dbl(function(v, i) v + b[i])
 ```
 
 
@@ -270,8 +274,8 @@ a <- 11:20
 m <- list(lowers = letters, uppers = LETTERS)
 
 a %>% pluck(1)  # equivalent to a[1]
-m %>% pluck("lowers")   # equivalent to m["lower"]
-m %>% pluck("lowers", 2)  # equivalent to m["lower"][2]
+m %>% pluck("lowers")   # equivalent to m["lowers"]
+m %>% pluck("lowers", 2)  # equivalent to m["lowers"][2]
 ```
 
 ### Keep and drop elements
@@ -294,13 +298,13 @@ a %>% discard(is_even)
 ## Summerizing
 
 ```{r}
-# is every element in a even?
-a %>% every(is_even)
-# are some elements in a even?
-a %>% some(is_even)
+# is every element in `a` even?
+a %>% every(is_even)  # maybe equivalent to all(is_even(a))
+# are some elements in `a` even?
+a %>% some(is_even)   # maybe equivalent to any(is_even(a))
 
-a %>% has_element(2)  # 2 is a double
-a %>% has_element(2L)
+a %>% has_element(12)  # 12 is a double
+a %>% has_element(12L)
 
 # the first even number is
 a %>% detect(is_even)
@@ -321,7 +325,7 @@ a %>% modify(~ . + 1L)
 a %>% modify_if(is_even, ~ -.)
 a %>% modify_if(~ !is_even(.), ~ -.)
 
-a %>% modify_at(c(1, 3, 5), ~ 0L)
+a %>% modify_at(c(1, 3, 5), ~ . + 2L)
 ```
 
 
@@ -333,7 +337,9 @@ m %>% flatten_chr()
 
 ```{r}
 (m1 <- m %>% map(~ .[1:5]))
-m1 %>% transpose()
+
+m1 %>% pluck("lowers", 2)
+m1 %>% transpose() %>% map(~ stringr::str_c(.$lowers, .$uppers))
 ```
 
 ## Add elements to lists
@@ -354,7 +360,9 @@ The `map` function applies to the inputs elementwisely. Sometimes, we wish to co
 ```{r}
 a <- c(7, 8, 9)
 b <- c(2, 3, 4)
-cross2(a, b) %>% map(lift(choose))
+choose(7, 3)
+lift(choose)(list(7, 3))
+cross2(a, b) %>% map_dbl(lift(choose))
 ```
 
 ```{r}
@@ -371,7 +379,10 @@ dat <- tibble(
   x = seq(-1, 1, length = 50),
   y = seq(-1, 1, length = 50))
 
+
 # we wish to plot a heat map of sqrt(x^2 + y^2)
+
+dat %>% mutate(z = sqrt(x^2 + y^2))  # wrong
 
 dat %>% 
   cross_df() %>% 
@@ -394,13 +405,15 @@ reduce(4:1, choose)
 # it means choose(choose(choose(4, 3), 2), 1)
 ```
 
+
 ```{r}
 # shortcircuit a reduction 
 sum_until <- function(x, y) {
-  if (x > 30) {
-    done(x)
+  out <- x + y
+  if (out > 30) {
+    done(out)
   } else {
-    x + y
+    out
   }
 }
 
