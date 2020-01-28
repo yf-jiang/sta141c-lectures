@@ -21,6 +21,8 @@
 | 01-16 - 01-21 | [functional programming](01-16/01-16-functional.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-16/01-16-functional.html) | [pdf](01-16/01-16-functional.pdf) |
 | 01-23 | [conditions](01-23/conditions.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-23/conditions.html) | [pdf](01-23/conditions.pdf) |
 |       | [debugging](01-23/debugging.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-23/debugging.html) | [pdf](01-23/debugging.pdf) |
+| 01-28 | [profiling](01-23/profiling.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-28/profiling.html) |  |
+|       | [Rcpp](01-23/rcpp.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-28/rcpp.html) |  |
 
 
 ## Site
