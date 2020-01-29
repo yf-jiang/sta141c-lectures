@@ -115,7 +115,7 @@ int while_ex(int x) {
 ```{r}
 while_ex(1)
 while_ex(7)
-while_ex(9)
+while_ex(10)
 ```
 
 ## Vector input, scalar output
@@ -180,8 +180,8 @@ This is a function that computes the Euclidean distance between a value and a ve
 pdistR <- function(x, ys) {
   sqrt((x - ys) ^ 2)
 }
-x <- runif(1e5)
-pdistR(0.5, x)
+y <- runif(1e5)
+pdistR(0.5, y)
 ```
 
 ```{Rcpp}
@@ -193,7 +193,7 @@ NumericVector pdistC(double x, NumericVector ys) {
   int n = ys.size();
   NumericVector out(n);
 
-  for(int i = 0; i < n; ++i) {
+  for(int i = 0; i < n; i++) {
     out[i] = sqrt(pow(ys[i] - x, 2.0));
   }
   return out;
@@ -205,11 +205,25 @@ NumericVector pdistC(double x, NumericVector ys) {
 - C++ uses `pow()`, not `^`, for exponentiation.
 - C++ is faster because it avoids the creation of temperary object like `x - ys` and `(x - ys)^2`.
 
+
+Rcpp provides sugar functions, but its performance could be much worse.
+```{Rcpp}
+#include <Rcpp.h>
+using namespace Rcpp;
+
+// [[Rcpp::export]]
+NumericVector pdistC2(double x, NumericVector ys) {
+  return sqrt(pow(ys - x, 2.0));
+}
+```
+
+
 ```{r}
 y <- runif(1e6)
-bench::mark(
+ggplot2::autoplot(bench::mark(
   pdistR(0.5, y),
-  pdistC(0.5, y)
+  pdistC(0.5, y),
+  pdistC2(0.5, y))
 )
 ```
 
