@@ -1,14 +1,14 @@
 ---
 title: "Profiling"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 date: "01-28-2020"
 ---
 
 # Admin stuff
 
-- Assignment 2 is due tomorrow
+- Assignment 2 is due today
 - Introduce `styler`
 - About final project
 
@@ -35,7 +35,7 @@ We consider this example of simple linear regression,
 ```{r}
 x <- runif(1e7)
 y <- runif(1e7)
-coef(lm(y ~ x))  #  it is quite slow
+coef(lm(y ~ x)) #  it is quite slow
 ```
 
 ```{r}
@@ -47,7 +47,7 @@ system.time(coef(lm(y ~ x)))
 
 ```{r}
 Rprof()
-coef(lm(y ~ x)) 
+coef(lm(y ~ x))
 Rprof(NULL)
 result <- summaryRprof()
 result$by.self
@@ -79,7 +79,7 @@ profvis(coef(lm(y ~ x)))
 
 ## Memory profiling
 
-When an object in R is not referenced by any other objects, it will get GC'ed (garbage collected).  =If <GC> is taking a lot of time, it’s usually an indication that you’re creating many short-lived objects.
+When an object in R is not referenced by any other objects, it will get GC'ed (garbage collected). If <GC> is taking a lot of time, it’s usually an indication that you’re creating many short-lived objects.
 
 ```{r}
 profvis({
@@ -89,7 +89,7 @@ profvis({
   }
 })
 ```
-Each time when `x <- c(x, i)` is execulated, the previous `x` is de-referenced and marked as pending to be GC'ed. R will GC'ed those `x`'s at some point down the line.
+Each time when `x <- c(x, i)` is execulated, the previous `x` is de-referenced and marked as pending to be GC'ed. R will GC those `x`'s at some point down the line.
 
 
 
@@ -104,13 +104,13 @@ The following code compares the speed of two approaches to computing a square ro
 x <- runif(100)
 bench::mark(
   sqrt(x),
-  x ^ 0.5
+  x^0.5
 )
 ```
 ```{r}
 bench::mark(
   sqrt(x),
-  x ^ 0.5,
+  x^0.5,
   relative = TRUE
 )
 ```
@@ -122,17 +122,17 @@ The simple linear regression example
 ```{r}
 slr <- function(x, y) {
   # it is meant to be inefficient
-  sxy <- sum((x - mean(x))*(y - mean(y)))
+  sxy <- sum((x - mean(x)) * (y - mean(y)))
   sxx <- sum((x - mean(x))^2)
   slope <- sxy / sxx
   intercept <- mean(y) - slope * mean(x)
   c(intercept, slope)
 }
 
-slr2 <- function(x, y) { 
+slr2 <- function(x, y) {
   mux <- mean(x)
   muy <- mean(y)
-  sxy <- sum((x - mux)*(y - muy))
+  sxy <- sum((x - mux) * (y - muy))
   sxx <- sum((x - mux)^2)
   slope <- sxy / sxx
   intercept <- muy - slope * mux
