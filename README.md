@@ -17,11 +17,11 @@
 | Date  | Note                                         | HTML                                  | PDF                                 |
 | ----  | ----                                         | ----                                  | ---                                 |
 | 01-07 | [introduction](01-07/01-07-introduction.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-07/01-07-introduction.html) | [pdf](01-07/01-07-introduction.pdf) |
-| 01-09 - 01-14 | [tidy data](01-09/01-09-tidy-data.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-09/01-09-tidy-data.html) | [pdf](01-09/01-09-tidy-data.pdf) |
-| 01-16 - 01-21 | [functional programming](01-16/01-16-functional.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-16/01-16-functional.html) | [pdf](01-16/01-16-functional.pdf) |
+| 01-09, 01-14 | [tidy data](01-09/01-09-tidy-data.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-09/01-09-tidy-data.html) | [pdf](01-09/01-09-tidy-data.pdf) |
+| 01-16, 01-21 | [functional programming](01-16/01-16-functional.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-16/01-16-functional.html) | [pdf](01-16/01-16-functional.pdf) |
 | 01-23 | [conditions](01-23/conditions.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-23/conditions.html) | [pdf](01-23/conditions.pdf) |
 |       | [debugging](01-23/debugging.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-23/debugging.html) | [pdf](01-23/debugging.pdf) |
-| 01-28 | [profiling](01-28/profiling.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-28/profiling.html) |  |
+| 01-28, 01-30 | [profiling](01-28/profiling.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-28/profiling.html) |  |
 |       | [Rcpp](01-28/Rcpp.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-28/Rcpp.html) | [pdf](01-28/Rcpp.pdf) |
 
 
