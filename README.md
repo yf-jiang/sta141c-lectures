@@ -41,8 +41,8 @@ Tentative Schedule:
 | 2      | Tidy data and Functional programming |
 | 3      | Debugging and profiling              |
 | 4      | Writing C and C++ extensions         |
-| 5      | Parallel Computing                   |
-| 6      | Databases and SQL                    |
+| 5      | Parallel & Distributed Computing     |
+| 6      | Bootstrap and BLB                    |
 | 7      | Writing an R package                 |
 | 8      | Interoperate with python             |
 | 9      | Deep learning in R                   |
