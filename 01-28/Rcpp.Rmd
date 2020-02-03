@@ -1,8 +1,8 @@
 ---
 title: "A crash course on Rcpp"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 date: "01-28-2020"
 ---
 
@@ -326,8 +326,8 @@ R_no_na <- function(x) {
     return( x[!is.na(x)] )
 }
 set.seed(1)
-x <- rnorm(1E5)
-x[sample(1E5, 1E4)] <- NA
+x <- rnorm(1e5)
+x[sample(1e5, 1e4)] <- NA
 
 ggplot2::autoplot(bench::mark(
   R_no_na(x),
@@ -367,7 +367,7 @@ ggplot2::autoplot(bench::mark(
 ))
 ```
 
-Well, again sugar functions could be slower.
+Again, we see that a naive for loop is faster.
 
 
 ## Values could be modified in place!!
@@ -417,10 +417,10 @@ x
 
 | R type | Rcpp type|
 | -------| ------|
-| int matrix | IntegerVector |
-| double matrix | NumericVector |
-| logicial matrix | LogicalVector |
-| character matrix | CharacterVector |
+| int matrix | IntegerMatrix |
+| double matrix | NumericMatrix |
+| logicial matrix | LogicalMatrix |
+| character matrix | CharacterMatrix |
 
 
 Our next example is to compute column sum of a matrix. (This example is for demonstration only, in practice, we use `colSums` directly)
@@ -503,8 +503,9 @@ DataFrame modifyDataFrame(DataFrame df) {
 ```
 
 ```{r}
-df <- tibble(a = c(1, 2, 3),
-                 b = c("x", "y", "z"))
+df <- tibble(
+    a = c(1, 2, 3),
+    b = c("x", "y", "z"))
 modifyDataFrame(df)
 ```
 
@@ -577,6 +578,6 @@ callWithTwo(g)
 # Reference
 
 - Rcpp for everyone https://teuder.github.io/rcpp4everyone_en/
-- Rcpp gallery https://gallery.rcpp.org/
 - Rcpp chapter of Advanced R https://adv-r.hadley.nz/rcpp.html
+- Rcpp gallery https://gallery.rcpp.org/
 - Rcpp Quick Reference Guide http://dirk.eddelbuettel.com/code/rcpp/Rcpp-quickref.pdf
