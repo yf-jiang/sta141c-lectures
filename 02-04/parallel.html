@@ -368,12 +368,12 @@ summary {
 
 
 <pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## ── Attaching packages ────────</code></pre>
+<pre><code>## ── Attaching packages ────── tidyverse 1.3.0 ──</code></pre>
 <pre><code>## ✓ ggplot2 3.2.1     ✓ purrr   0.3.3
-## ✓ tibble  2.1.3     ✓ dplyr   0.8.3
-## ✓ tidyr   1.0.0     ✓ stringr 1.4.0
+## ✓ tibble  2.1.3     ✓ dplyr   0.8.4
+## ✓ tidyr   1.0.2     ✓ stringr 1.4.0
 ## ✓ readr   1.3.1     ✓ forcats 0.4.0</code></pre>
-<pre><code>## ── Conflicts ─────────────────
+<pre><code>## ── Conflicts ───────── tidyverse_conflicts() ──
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <div id="parallel-computation" class="section level1">
@@ -384,7 +384,7 @@ summary {
 <li>BLAS (Basic Linear Algebra Subroutines)
 <ul>
 <li>CRAN R shippings with a <a href="https://github.com/wch/r-source/tree/trunk/src/extra/blas">version</a> of single threaded BLAS library.</li>
-<li><a href="https://mran.microsoft.com/open">Microsoft R Open</a> ships with Interl MKL (Win/Linux) / Accelerate ML (macOS) BLAS libraries.</li>
+<li><a href="https://mran.microsoft.com/open">Microsoft R Open</a> ships with Intel MKL (Win/Linux) / Accelerate ML (macOS) BLAS libraries.</li>
 <li>on macOS, R could be configured to use the optimized BLAS from Apple’s Accelerate framework</li>
 <li>We could only install R with different BLAS libraries such as <a href="https://github.com/xianyi/OpenBLAS">openblas</a> or <a href="http://math-atlas.sourceforge.net/">ATLAS</a></li>
 </ul></li>
@@ -411,6 +411,8 @@ summary {
 ## [1] 16</code></pre>
 <pre class="r"><code>1:4 %&gt;% map_dbl(function(x) x^2)</code></pre>
 <pre><code>## [1]  1  4  9 16</code></pre>
+<pre class="r"><code>1:4 %&gt;% map_dbl(~ .^2)</code></pre>
+<pre><code>## [1]  1  4  9 16</code></pre>
 <p>These are the base R equivalence.</p>
 <pre class="r"><code>1:4 %&gt;% lapply(function(x) x^2)</code></pre>
 <pre><code>## [[1]]
@@ -435,30 +437,30 @@ slow_task &lt;- function(x) {
 list_of_vectors &lt;- replicate(10, list(rnorm(5000)))
 list_of_vectors %&gt;% glimpse()</code></pre>
 <pre><code>## List of 10
-##  $ : num [1:5000] 2.102 0.759 0.376 -0.725 1.012 ...
-##  $ : num [1:5000] 0.888 -0.727 0.784 1.101 0.955 ...
-##  $ : num [1:5000] 0.217 0.732 3.087 -1.419 -1.922 ...
-##  $ : num [1:5000] 0.563 -1.087 2.019 -1.697 -1.171 ...
-##  $ : num [1:5000] -1.228 -0.43 0.478 0.622 1.853 ...
-##  $ : num [1:5000] 0.049 -0.4685 0.4881 0.4523 -0.0231 ...
-##  $ : num [1:5000] -0.7981 -0.5627 -1.7617 1.3871 0.0545 ...
-##  $ : num [1:5000] 2.423 -0.577 -1.482 -0.216 1.767 ...
-##  $ : num [1:5000] -1.031 -0.233 -0.909 1.754 0.727 ...
-##  $ : num [1:5000] -0.0207 1.4221 -0.6586 1.7431 -0.4444 ...</code></pre>
+##  $ : num [1:5000] -1.2449 0.1558 -0.6714 0.0718 -0.183 ...
+##  $ : num [1:5000] -0.154 1.059 0.237 -0.733 -1.225 ...
+##  $ : num [1:5000] -0.3519 0.0696 -0.6979 0.4361 -0.4384 ...
+##  $ : num [1:5000] -0.0678 0.3593 -0.3892 -1.1623 -0.8723 ...
+##  $ : num [1:5000] 1.398 1.213 -0.38 2.752 0.701 ...
+##  $ : num [1:5000] 0.8652 -0.0464 0.9007 -0.4526 -0.5981 ...
+##  $ : num [1:5000] -0.224 1.654 -0.176 -0.462 1.495 ...
+##  $ : num [1:5000] 0.813 -1.924 0.383 -0.836 0.109 ...
+##  $ : num [1:5000] -1.6296 1.6615 -0.0391 -1.6476 -0.0823 ...
+##  $ : num [1:5000] 0.1123 1.8103 0.6208 0.0154 -0.6184 ...</code></pre>
 <pre class="r"><code>list_of_vectors %&gt;% map_dbl(slow_task)</code></pre>
 <p>However, these commands only run in a single process, it means, if the list is doubled, the time is also at least doubled.</p>
 <pre class="r"><code>system.time({
   list_of_vectors %&gt;% map_dbl(slow_task)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##   4.183   1.884   6.224</code></pre>
+##   1.690   0.771   3.115</code></pre>
 <pre class="r"><code># double the list
 longer_list_of_vectors &lt;- c(list_of_vectors, list_of_vectors)
 system.time({
   longer_list_of_vectors %&gt;% map_dbl(slow_task)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##   7.408   3.506  11.108</code></pre>
+##   2.957   1.489   5.202</code></pre>
 <p>We are hoping to use multiple processes to speed up the job. The traditional way is to use the <code>parallel</code> package.</p>
 </div>
 <div id="the-package-parallel" class="section level2">
@@ -467,63 +469,60 @@ system.time({
 <p>Consider again the above list_vector example,</p>
 <pre class="r"><code># the number of cores we have
 detectCores()</code></pre>
-<pre><code>## [1] 8</code></pre>
+<pre><code>## [1] 4</code></pre>
 <pre class="r"><code># it will create a socket cluster on my own computer
 cl &lt;- makeCluster(4)
 parLapply(cl, list_of_vectors, slow_task)</code></pre>
 <pre><code>## [[1]]
-## [1] 1786.982
+## [1] 9927.672
 ## 
 ## [[2]]
-## [1] 245.7832
+## [1] 1111.301
 ## 
 ## [[3]]
-## [1] 1822.179
+## [1] 781.2653
 ## 
 ## [[4]]
-## [1] 1014.374
+## [1] 1200.171
 ## 
 ## [[5]]
-## [1] 21698.62
+## [1] 1849.372
 ## 
 ## [[6]]
-## [1] 8266.037
+## [1] 11556.77
 ## 
 ## [[7]]
-## [1] 2742.947
+## [1] 6909.416
 ## 
 ## [[8]]
-## [1] 11172.33
+## [1] 6463.48
 ## 
 ## [[9]]
-## [1] 5345.129
+## [1] 4115.049
 ## 
 ## [[10]]
-## [1] 775.8097</code></pre>
+## [1] 1807.894</code></pre>
 <pre class="r"><code># or if you want simplified result
 parSapply(cl, list_of_vectors, slow_task)</code></pre>
-<pre><code>##  [1]  1786.9821   245.7832  1822.1787  1014.3741 21698.6168  8266.0371
-##  [7]  2742.9467 11172.3297  5345.1287   775.8097</code></pre>
+<pre><code>##  [1]  9927.6716  1111.3011   781.2653  1200.1714  1849.3719 11556.7676
+##  [7]  6909.4155  6463.4796  4115.0490  1807.8944</code></pre>
 <pre class="r"><code># stop the cluster after use
 stopCluster(cl)</code></pre>
 <p>Remark: you don’t have to make and stop clusters for every operation, you could make a cluster in the very beginning of your script and close it at the very end.</p>
 <p>Let’s test the speed improvement</p>
-<pre class="r"><code>sum_each &lt;- function(x, fun, n_cores) {
+<pre class="r"><code>run_each &lt;- function(x, fun, n_cores) {
   cl &lt;- makeCluster(n_cores)
   result &lt;- parLapply(cl, x, fun)
   stopCluster(cl)
   result
 }
 
-system.time(sum_each(longer_list_of_vectors, slow_task, 2))</code></pre>
+system.time(run_each(longer_list_of_vectors, slow_task, 2))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.018   0.014   5.413</code></pre>
-<pre class="r"><code>system.time(sum_each(longer_list_of_vectors, slow_task, 3))</code></pre>
+##   0.007   0.006   2.769</code></pre>
+<pre class="r"><code>system.time(run_each(longer_list_of_vectors, slow_task, 8))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.034   0.024   5.172</code></pre>
-<pre class="r"><code>system.time(sum_each(longer_list_of_vectors, slow_task, 4))</code></pre>
-<pre><code>##    user  system elapsed 
-##   0.020   0.023   3.399</code></pre>
+##   0.020   0.019   3.893</code></pre>
 </div>
 <div id="processing-chunk" class="section level2">
 <h2>Processing Chunk</h2>
@@ -532,19 +531,19 @@ system.time(sum_each(longer_list_of_vectors, slow_task, 2))</code></pre>
 <pre class="r"><code>parSapply(cl, 1:10, function(x) {
     Sys.getpid()
 })</code></pre>
-<pre><code>##  [1] 98641 98641 98641 98656 98656 98668 98668 98680 98680 98680</code></pre>
+<pre><code>##  [1] 90013 90013 90013 90026 90026 90038 90038 90050 90050 90050</code></pre>
 <pre class="r"><code>parSapply(cl, 1:10, function(x) {
     Sys.getpid()
   },
   chunk.size = 2
 )</code></pre>
-<pre><code>##  [1] 98641 98641 98656 98656 98668 98668 98680 98680 98641 98641</code></pre>
+<pre><code>##  [1] 90013 90013 90026 90026 90038 90038 90050 90050 90013 90013</code></pre>
 <pre class="r"><code>parSapply(cl, 1:10, function(x) {
     Sys.getpid()
   },
   chunk.size = 1
 )</code></pre>
-<pre><code>##  [1] 98641 98656 98668 98680 98641 98656 98668 98680 98641 98656</code></pre>
+<pre><code>##  [1] 90013 90026 90038 90050 90013 90026 90038 90050 90013 90026</code></pre>
 <pre class="r"><code>stopCluster(cl)</code></pre>
 </div>
 <div id="load-balancing" class="section level2">
@@ -557,21 +556,31 @@ pause &lt;- function(x) {
 }
 
 system.time({
+  map(x, pause)
+})</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.001   0.000  12.019</code></pre>
+<pre class="r"><code>system.time({
+  parLapply(cl, x, pause)
+})</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.001   0.001   6.005</code></pre>
+<pre class="r"><code>system.time({
   parLapply(cl, x, pause, chunk.size = 2)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.002   0.000   6.029</code></pre>
+##   0.002   0.000   6.007</code></pre>
 <pre class="r"><code>system.time({
   parLapply(cl, x, pause, chunk.size = 1)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.005   0.000   4.009</code></pre>
+##   0.002   0.001   4.005</code></pre>
 <p>Instead of preshceduling the tasks, a task could also be assigned to a free worker dynamically using <code>parLapplyLB</code>.</p>
 <pre class="r"><code>system.time({
   parLapplyLB(cl, x, pause)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.003   0.001   3.012</code></pre>
+##   0.003   0.001   3.009</code></pre>
 <p>Note that it only takes 3 seconds now.</p>
 <pre class="r"><code>stopCluster(cl)</code></pre>
 </div>
@@ -585,31 +594,31 @@ system.time({
   mean(x)
 })</code></pre>
 <pre><code>## [[1]]
-## [1] 0.1860213
+## [1] -0.02440768
 ## 
 ## [[2]]
-## [1] 0.0541988
+## [1] -0.1913625
 ## 
 ## [[3]]
-## [1] -0.09832572
+## [1] 0.1179574
 ## 
 ## [[4]]
-## [1] -0.001729703</code></pre>
+## [1] 0.06944298</code></pre>
 <pre class="r"><code>clusterEvalQ(cl, {
   Sys.getpid()
 })</code></pre>
 <pre><code>## [[1]]
-## [1] 98746
+## [1] 90139
 ## 
 ## [[2]]
-## [1] 98762
+## [1] 90151
 ## 
 ## [[3]]
-## [1] 98774
+## [1] 90163
 ## 
 ## [[4]]
-## [1] 98786</code></pre>
-<p>Global variables in master are not exported to the worker automatically</p>
+## [1] 90175</code></pre>
+<p>Global variables in master are not exported to the worker automatically (the same is true for <code>parLapply</code>)</p>
 <pre class="r"><code>y &lt;- 3
 clusterEvalQ(cl, {
   y + 1
@@ -632,7 +641,24 @@ clusterEvalQ(cl, {
 ## [[4]]
 ## [1] 4</code></pre>
 <p>If you want to set a random seed, the following doesn’t work because each work returns the same result.</p>
-<pre class="r"><code>clusterEvalQ(cl, {
+<pre class="r"><code># wrong
+set.seed(123)
+clusterEvalQ(cl, {
+  rnorm(5)
+})</code></pre>
+<pre><code>## [[1]]
+## [1] -0.2495769 -0.4653820 -2.6019128  1.6111187 -0.7607300
+## 
+## [[2]]
+## [1]  0.3147689  0.7872206 -0.8773706  1.7774224  1.7034408
+## 
+## [[3]]
+## [1] -0.80683447 -0.81892103 -0.73709606 -1.73878336  0.03712192
+## 
+## [[4]]
+## [1]  0.3038605 -0.2788308 -0.2682087  0.2602501  0.8283057</code></pre>
+<pre class="r"><code># wrong again
+clusterEvalQ(cl, {
   set.seed(123)
   rnorm(5)
 })</code></pre>
@@ -665,94 +691,64 @@ clusterEvalQ(cl, {
 <pre class="r"><code># do not forget to close the cluster
 stopCluster(cl)</code></pre>
 </div>
+<div id="another-pouplar-package-foreach" class="section level2">
+<h2>Another pouplar package: <code>foreach</code></h2>
+<p>As we have seen a bit earlier, we might need to use <code>clusterExport</code> to export certain gloabl variables. It would be a bit cumbersome. To reduce the extra steps, we could consider <code>foreach</code> and <code>doParallel</code>. They will send all the globals to the workers before running the tasks.</p>
+<pre class="r"><code>library(foreach)
+library(doParallel)</code></pre>
+<pre class="r"><code>cl &lt;- makeCluster(4)
+registerDoParallel(cl)
+m &lt;- matrix(rnorm(9), 3, 3)
+# matrix m is sent to the workers implictly
+# in fact, all globals are sent to the workers in default
+foreach(i = seq_len(nrow(m)), .combine = c) %dopar% {
+  sum(m[i, ])
+}</code></pre>
+<pre><code>## [1] -0.02905105 -1.36595099  2.58692045</code></pre>
+<pre class="r"><code>stopCluster(cl)</code></pre>
+<p>However, it is not quite “functional” as <code>map</code>, <code>lapply</code> and <code>parLapply</code>.</p>
+</div>
 <div id="map-or-lapply-like-syntax" class="section level2">
 <h2><code>map</code> or <code>lapply</code> like syntax</h2>
-<ul>
-<li><code>mclapply</code> from <code>parallel</code> (unix / macOS only)</li>
-</ul>
+<div id="mclapply-from-parallel-unix-macos-only" class="section level3">
+<h3><code>mclapply</code> from <code>parallel</code> (unix / macOS only)</h3>
 <p>Remark: <code>mclapply</code> relies on forking, it means that it doesn’t work on Windows. We will discuss a cross platform approach.)</p>
-<pre class="r"><code>list_of_vectors %&gt;% mclapply(
-  slow_task, 
-  mc.cores = 4
-)</code></pre>
-<pre><code>## [[1]]
-## [1] 1786.982
-## 
-## [[2]]
-## [1] 245.7832
-## 
-## [[3]]
-## [1] 1822.179
-## 
-## [[4]]
-## [1] 1014.374
-## 
-## [[5]]
-## [1] 21698.62
-## 
-## [[6]]
-## [1] 8266.037
-## 
-## [[7]]
-## [1] 2742.947
-## 
-## [[8]]
-## [1] 11172.33
-## 
-## [[9]]
-## [1] 5345.129
-## 
-## [[10]]
-## [1] 775.8097</code></pre>
-<pre class="r"><code>list_of_vectors %&gt;% mclapply(
-  slow_task, 
-  mc.preschedule = FALSE,  #  set FALSE to enable load balancing
-  mc.cores = 4
-)</code></pre>
-<pre><code>## [[1]]
-## [1] 1786.982
-## 
-## [[2]]
-## [1] 245.7832
-## 
-## [[3]]
-## [1] 1822.179
-## 
-## [[4]]
-## [1] 1014.374
-## 
-## [[5]]
-## [1] 21698.62
-## 
-## [[6]]
-## [1] 8266.037
-## 
-## [[7]]
-## [1] 2742.947
-## 
-## [[8]]
-## [1] 11172.33
-## 
-## [[9]]
-## [1] 5345.129
-## 
-## [[10]]
-## [1] 775.8097</code></pre>
-<ul>
-<li>package <code>furrr</code></li>
-</ul>
-<p><code>furrr</code> provides functions which are very similar to those in <code>purrr</code>.</p>
-<pre class="r"><code>library(furrr)</code></pre>
-<pre><code>## Loading required package: future</code></pre>
-<pre class="r"><code>plan(multiprocess, workers = 4)
+<pre class="r"><code># in default, `mclapply` uses 2 cores
 system.time({
-  future_map(c(2, 2, 2, 2), ~Sys.sleep(.))
+  mclapply(
+    c(2, 2, 2, 2), 
+    function(x) Sys.sleep(x))
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.227   0.021   2.873</code></pre>
+##   0.004   0.007   4.011</code></pre>
+<pre class="r"><code>system.time({
+  mclapply(
+    c(3, 3, 1, 1, 1, 1, 1, 1), 
+    function(x) Sys.sleep(x),
+    mc.preschedule = FALSE,  #  set FALSE to enable load balancing
+    mc.cores = 4
+  )
+})</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.012   0.017   3.017</code></pre>
+</div>
+<div id="package-furrr" class="section level3">
+<h3>package <code>furrr</code></h3>
+<p><code>furrr</code> provides functions which are very similar to those in <code>purrr</code>.</p>
+<pre class="r"><code>library(furrr)</code></pre>
+<pre class="r"><code># to use 4 workers, omit it to use all available cores
+plan(multiprocess, workers = 4)
+system.time({
+  future_map(
+    c(2, 2, 2, 2),
+    ~Sys.sleep(.))
+})</code></pre>
+<pre><code>##    user  system elapsed 
+##   0.054   0.003   2.209</code></pre>
+<p><code>future_map</code> has a family of type speific functions. For example,</p>
 <pre class="r"><code>future_map_dbl(list(1:10, 11:20, 21:30, 31:41), ~ sum(.))</code></pre>
 <pre><code>## [1]  55 155 255 396</code></pre>
-<p>How to do load balanacing with <code>future_map</code>?</p>
+<p>load balanacing in <code>future_map</code></p>
 <pre class="r"><code># without load balanacing
 system.time({
   future_map(
@@ -760,7 +756,7 @@ system.time({
     ~Sys.sleep(.))
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.247   0.012   6.085</code></pre>
+##   0.063   0.004   6.027</code></pre>
 <pre class="r"><code># with load balanacing
 system.time({
   future_map(
@@ -769,10 +765,14 @@ system.time({
     .options = future_options(scheduling = FALSE))
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.429   0.023   4.157</code></pre>
+##   0.086   0.003   3.918</code></pre>
 </div>
-<div id="foreach" class="section level2">
-<h2><code>foreach</code></h2>
+</div>
+<div id="the-honorable-mention-multidplyr" class="section level2">
+<h2>The honorable mention <code>multidplyr</code></h2>
+<p>The package <code>multidplyr</code> is tidyverse solution to multiprocess data management. However, it is not released to CRAN yet, it means we need to install it from its github repo by using the package <code>remotes</code>.</p>
+<pre class="r"><code>remotes::install_github(&quot;tidyverse/multidplyr&quot;)</code></pre>
+<p>Since it is still under developement, use it with caution!</p>
 <p>Reference:</p>
 <ul>
 <li>R Programming for Data Science <a href="https://bookdown.org/rdpeng/rprogdatascience/parallel-computation.html" class="uri">https://bookdown.org/rdpeng/rprogdatascience/parallel-computation.html</a></li>
