@@ -1,0 +1,163 @@
+---
+title: "Shell tutorial"
+output:
+  pdf_document: default
+  html_document: default
+date: "02-06-2020"
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+A Shell is a program that enables user to interact with the operating system. There are a few common implementaion of a shell.
+
+- bash
+  - the most common shell
+  - default in linux
+  - used to be the default shell on macOS
+- zsh
+  - the default shell in macOS 10.15 Catalina
+- powershell
+  - primarily used in windows
+  
+We will focus on `bash` (and `zsh` is `bash` compatible).
+
+
+There are a few program to launch the shell.
+
+- linux
+  - depends on the desktop environment, it could be gnome terminal, konsole etc..
+- macOS
+  - the default Terminal
+  - iTerm2
+- Windows
+  - Powershell
+  - Cmd (which runs DOS)
+  - Cmder
+- RStudio terminal
+- Rmarkdown (for bash script)
+
+
+## Commands to cover
+
+### File navigation
+
+- ls
+  
+  A usful alias is
+  ```
+  alias ls='ls --color=auto -F'
+  ```
+  
+- pwd
+- cd
+
+
+### File manipulation
+
+- touch
+- mkdir
+- mv
+- cp
+- rm
+
+### Utility
+
+- echo
+- cat
+- which
+- export
+
+
+## SSH
+
+> The SSH protocol (also referred to as Secure Shell) is a method for secure remote login from one computer to another.
+
+To use ssh, we need to install ssh.
+
+- linux and macOS
+  - you should have a the ssh program already
+- Windows
+  - if you have install git for windows, we should have git-bash and ssh installed.
+  
+
+### Login to your peloton account
+
+```
+ssh sta141c-NUMBER@peloton.cse.ucdavis.edu
+```
+
+Unfortunately, you will need to copy and paste password everytime you login. (I will teach you a way to do it in R without typing password each time).
+
+  
+### File editing over ssh
+
+
+Editing a file over SSH is not an easy task. 
+
+- use a text editor in the system
+- edit it locally and upload it to the server
+  - either use `scp` functions 
+  - or a software, for example "Cyber Duck" for macOS and WinScp for Windows.
+
+### `scp` function to copy files from to to server
+
+To copy a local file `file.txt` to remote `~/foo/file.txt`
+```
+scp file.txt sta141c-98@peloton.cse.ucdavis.edu:~/foo/
+```
+
+To copy a local directory to remote `~/foo/local_directory`
+```
+scp -r local_directory sta141c-98@peloton.cse.ucdavis.edu:~/foo/
+```
+
+To copy a local file `file.txt` from remote `~/foo/file.txt`
+```
+scp sta141c-98@peloton.cse.ucdavis.edu:~/foo/file.txt ./
+```
+
+To copy a directory from remote `~/foo/`
+```
+scp -r sta141c-98@peloton.cse.ucdavis.edu:~/foo/ ./
+```
+
+
+### The package `ssh` and `keyring`.
+
+```{r}
+library(keyring)
+# only need to do it once
+key_set("PELOTONPASSWORD")
+```
+
+```{r}
+library(ssh)
+session <- ssh_connect(
+  "sta141c-98@peloton.cse.ucdavis.edu", 
+  passwd = keyring::key_get("PELOTONPASSWORD"))
+session
+```
+```{r}
+session %>% ssh_exec_wait(
+  "ls -A"
+)
+```
+
+
+```{r}
+session %>% ssh_exec_wait("mkdir -p shell")
+session %>% scp_upload("shell.Rmd", to = "shell/")
+session %>% scp_download("shell/shell.Rmd", to = "foo/")
+```
+
+```{r}
+ssh_disconnect(session)
+```
+
+
+# Reference
+
+- Episode 1 to 3 of http://swcarpentry.github.io/shell-novice/
