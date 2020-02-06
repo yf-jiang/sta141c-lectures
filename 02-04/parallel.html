@@ -773,6 +773,87 @@ system.time({
 <p>The package <code>multidplyr</code> is tidyverse solution to multiprocess data management. However, it is not released to CRAN yet, it means we need to install it from its github repo by using the package <code>remotes</code>.</p>
 <pre class="r"><code>remotes::install_github(&quot;tidyverse/multidplyr&quot;)</code></pre>
 <p>Since it is still under developement, use it with caution!</p>
+<pre class="r"><code>library(multidplyr)</code></pre>
+<p>There are two ways to get data to the workers in cluster:</p>
+<ul>
+<li><code>partition()</code> a data frame that already loaded in the interactive process.</li>
+<li>Load a different subset of the data in each worker.</li>
+</ul>
+<p>Use <code>partition()</code> to send data to workers</p>
+<pre class="r"><code>library(nycflights13)
+
+cluster &lt;- new_cluster(4)
+
+flights %&gt;%
+  group_by(dest, origin) %&gt;%
+  partition(cluster) %&gt;%
+  summarize(air_time = mean(air_time, na.rm = TRUE))</code></pre>
+<pre><code>## Source: party_df [224 x 3]
+## Groups: dest
+## Shards: 4 [43--67 rows]
+## 
+##   dest  origin air_time
+##   &lt;chr&gt; &lt;chr&gt;     &lt;dbl&gt;
+## 1 ABQ   JFK       249. 
+## 2 ATL   JFK       112. 
+## 3 AVL   EWR        89.8
+## 4 AVL   LGA        92.2
+## 5 BDL   EWR        25.5
+## 6 BHM   JFK       117  
+## # … with 218 more rows</code></pre>
+<p>Load data in each worker</p>
+<pre class="r"><code>cluster &lt;- new_cluster(4)
+
+cluster %&gt;% cluster_library(c(&quot;tidyverse&quot;, &quot;nycflights13&quot;))
+
+cluster %&gt;% 
+  cluster_assign_partition(destination = unique(flights$dest))
+
+# let&#39;s check the `destimation` variable in the workers
+cluster %&gt;%
+  cluster_call(destination)</code></pre>
+<pre><code>## [[1]]
+##  [1] &quot;IAH&quot; &quot;MIA&quot; &quot;BQN&quot; &quot;ATL&quot; &quot;ORD&quot; &quot;FLL&quot; &quot;IAD&quot; &quot;MCO&quot; &quot;PBI&quot; &quot;TPA&quot; &quot;LAX&quot; &quot;SFO&quot;
+## [13] &quot;DFW&quot; &quot;BOS&quot; &quot;LAS&quot; &quot;MSP&quot; &quot;DTW&quot; &quot;RSW&quot; &quot;SJU&quot; &quot;PHX&quot; &quot;BWI&quot; &quot;CLT&quot; &quot;BUF&quot; &quot;DEN&quot;
+## [25] &quot;SNA&quot; &quot;MSY&quot; &quot;SLC&quot;
+## 
+## [[2]]
+##  [1] &quot;XNA&quot; &quot;MKE&quot; &quot;SEA&quot; &quot;ROC&quot; &quot;SYR&quot; &quot;SRQ&quot; &quot;RDU&quot; &quot;CMH&quot; &quot;JAX&quot; &quot;CHS&quot; &quot;MEM&quot; &quot;PIT&quot;
+## [13] &quot;SAN&quot; &quot;DCA&quot; &quot;CLE&quot; &quot;STL&quot; &quot;MYR&quot; &quot;JAC&quot; &quot;MDW&quot; &quot;HNL&quot; &quot;BNA&quot; &quot;AUS&quot; &quot;BTV&quot; &quot;PHL&quot;
+## [25] &quot;STT&quot; &quot;EGE&quot;
+## 
+## [[3]]
+##  [1] &quot;AVL&quot; &quot;PWM&quot; &quot;IND&quot; &quot;SAV&quot; &quot;CAK&quot; &quot;HOU&quot; &quot;LGB&quot; &quot;DAY&quot; &quot;ALB&quot; &quot;BDL&quot; &quot;MHT&quot; &quot;MSN&quot;
+## [13] &quot;GSO&quot; &quot;CVG&quot; &quot;BUR&quot; &quot;RIC&quot; &quot;GSP&quot; &quot;GRR&quot; &quot;MCI&quot; &quot;ORF&quot; &quot;SAT&quot; &quot;SDF&quot; &quot;PDX&quot; &quot;SJC&quot;
+## [25] &quot;OMA&quot; &quot;CRW&quot;
+## 
+## [[4]]
+##  [1] &quot;OAK&quot; &quot;SMF&quot; &quot;TUL&quot; &quot;TYS&quot; &quot;OKC&quot; &quot;PVD&quot; &quot;DSM&quot; &quot;PSE&quot; &quot;BHM&quot; &quot;CAE&quot; &quot;HDN&quot; &quot;BZN&quot;
+## [13] &quot;MTJ&quot; &quot;EYW&quot; &quot;PSP&quot; &quot;ACK&quot; &quot;BGR&quot; &quot;ABQ&quot; &quot;ILM&quot; &quot;MVY&quot; &quot;SBN&quot; &quot;LEX&quot; &quot;CHO&quot; &quot;TVC&quot;
+## [25] &quot;ANC&quot; &quot;LGA&quot;</code></pre>
+<pre class="r"><code>cluster %&gt;% cluster_send({
+  df &lt;- flights %&gt;% filter(dest %in% destination)
+})
+
+cluster %&gt;% party_df(&quot;df&quot;) %&gt;%
+  group_by(dest, origin) %&gt;%
+  summarize(air_time = mean(air_time, na.rm = TRUE)) %&gt;%
+  collect()</code></pre>
+<pre><code>## # A tibble: 224 x 3
+## # Groups:   dest [105]
+##    dest  origin air_time
+##    &lt;chr&gt; &lt;chr&gt;     &lt;dbl&gt;
+##  1 ATL   EWR       112. 
+##  2 ATL   JFK       112. 
+##  3 ATL   LGA       114. 
+##  4 BOS   EWR        40.3
+##  5 BOS   JFK        38.5
+##  6 BOS   LGA        37.9
+##  7 BQN   EWR       196. 
+##  8 BQN   JFK       194. 
+##  9 BUF   EWR        51.2
+## 10 BUF   JFK        57.1
+## # … with 214 more rows</code></pre>
 <p>Reference:</p>
 <ul>
 <li>R Programming for Data Science <a href="https://bookdown.org/rdpeng/rprogdatascience/parallel-computation.html" class="uri">https://bookdown.org/rdpeng/rprogdatascience/parallel-computation.html</a></li>
