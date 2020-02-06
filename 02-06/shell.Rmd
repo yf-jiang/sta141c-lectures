@@ -1,8 +1,8 @@
 ---
 title: "Shell tutorial"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 date: "02-06-2020"
 ---
 
@@ -44,29 +44,38 @@ There are a few program to launch the shell.
 
 ### File navigation
 
-- ls
+- ls - list the current directory
   
-  A usful alias is
+  A usful alias for unix is
   ```
   alias ls='ls --color=auto -F'
   ```
   
-- pwd
-- cd
+- pwd - show the current directory
+- cd  - change directory
+
+  - `cd ..` go to parent directory
+  - `cd -` go to the previous directory
+  - `cd ~` go to the home directory
 
 
 ### File manipulation
 
-- touch
-- mkdir
-- mv
+- touch - create an empty file
+- mkdir 
+  - create a direpcty
+  - `mkdir -p folder1/folder2/folder3`
+- mv rename / move a file
 - cp
 - rm
+  - `rm file`
+  - `rm -r dir` 
 
 ### Utility
 
 - echo
-- cat
+- cat 
+  - print the content of a file
 - which
 - export
 
