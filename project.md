@@ -14,6 +14,7 @@ There are two project directions
 1. [Data analysis] Apply the little bag of bootstrap algorithm to some real data. Here is a list of awesome datasets https://github.com/awesomedata/awesome-public-datasets
 2. [Data engineering] Write an R package which applies little bag of bootstrap algorithm.
 
+You also also submit your perference to the google form: https://forms.gle/xHf4Bhm4nEK6rQp17
 
 ## Data analysis
 
