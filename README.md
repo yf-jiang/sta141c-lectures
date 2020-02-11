@@ -25,6 +25,7 @@
 |       | [Rcpp](01-28/Rcpp.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-28/Rcpp.html) | [pdf](01-28/Rcpp.pdf) |
 | 02-04 | [parallel](02-04/parallel.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-04/parallel.html) | [pdf](02-04/parallel.pdf) |
 | 02-06 | [shell](02-06/shell.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-06/shell.html) | [pdf](02-06/shell.pdf) |
+| 02-11 | [mpi](02-11/mpi.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-11/mpi.html) | [pdf](02-11/mpi.pdf) |
 
 
 ## Site
