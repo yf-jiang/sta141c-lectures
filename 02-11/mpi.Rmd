@@ -51,7 +51,9 @@ Our cluster uses SLURM to manage resources. There are two common resource manage
 - first ssh into your account on peloton.cse.ucdavis.edu
 - upload your R script to the server (either by a GUI software such as Cyber Duck/ WinScp or using `scp`)
 
-Important! Be considerate, do not specific more than enough cores. Our class has 128 cores shared betwwen 50 students. Use `sinfo` to query the current status of the cluster and `squeue` to check the running jobs in the cluster.
+Important! 
+- Do not run R in the head node
+- Be considerate, do not specific more than enough cores. Our class has 128 cores shared betwwen 50 students. Use `sinfo` to query the current status of the cluster and `squeue` to check the running jobs in the cluster.
 
 ## Basic Communicator Wrangling
 

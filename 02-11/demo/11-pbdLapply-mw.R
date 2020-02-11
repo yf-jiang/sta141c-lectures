@@ -22,3 +22,6 @@ if (.comm.rank == 0) {
 y <- pbdLapply(x, function(x) x^2, pbd.mode = "mw")
 
 comm.print(y)
+
+### Finish.
+finalize()

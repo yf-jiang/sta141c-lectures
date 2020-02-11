@@ -17,3 +17,6 @@ x <- sample(10, 3)
 y <- pbdLapply(x, function(x) x^2, pbd.mode = "dist")
 
 comm.print(y, all.rank = TRUE)
+
+### Finish.
+finalize()
