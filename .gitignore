@@ -2,3 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+sftp-config.json
+sftp-config-alt.json
+*_cache/
