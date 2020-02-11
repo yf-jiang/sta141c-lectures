@@ -50,6 +50,12 @@ Our cluster uses SLURM to manage resources. There are two common resource manage
 
 - first ssh into your account on peloton.cse.ucdavis.edu
 - upload your R script to the server (either by a GUI software such as Cyber Duck/ WinScp or using `scp`)
+- Use the following to download all the demo codes,
+
+```
+svn export https://github.com/UCDavis-STA-141C-Winter-2020/sta141c-lectures/branches/master/02-11/demo/
+```
+
 
 Important! 
 - Do not run R in the head node
