@@ -1,8 +1,8 @@
 ---
 title: "Parallel Computation"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 date: "02-04-2020"
 ---
 
@@ -127,17 +127,17 @@ cl <- makeCluster(4)
 
 ```{r}
 parSapply(cl, 1:10, function(x) {
-    Sys.getpid()
+  Sys.getpid()
 })
 parSapply(cl, 1:10, function(x) {
-    Sys.getpid()
-  },
-  chunk.size = 2
+  Sys.getpid()
+},
+chunk.size = 2
 )
 parSapply(cl, 1:10, function(x) {
-    Sys.getpid()
-  },
-  chunk.size = 1
+  Sys.getpid()
+},
+chunk.size = 1
 )
 ```
 
@@ -292,15 +292,16 @@ Remark: `mclapply` relies on forking, it means that it doesn't work on Windows. 
 # in default, `mclapply` uses 2 cores
 system.time({
   mclapply(
-    c(2, 2, 2, 2), 
-    function(x) Sys.sleep(x))
+    c(2, 2, 2, 2),
+    function(x) Sys.sleep(x)
+  )
 })
 
 system.time({
   mclapply(
-    c(3, 3, 1, 1, 1, 1, 1, 1), 
+    c(3, 3, 1, 1, 1, 1, 1, 1),
     function(x) Sys.sleep(x),
-    mc.preschedule = FALSE,  #  set FALSE to enable load balancing
+    mc.preschedule = FALSE, #  set FALSE to enable load balancing
     mc.cores = 4
   )
 })
@@ -315,12 +316,13 @@ library(furrr)
 ```
 
 ```{r, warning = FALSE}
-# to use 4 workers, omit it to use all available cores
+# to use 4 workers, `plan(multiprocess)` will use all the avaliable workers
 plan(multiprocess, workers = 4)
 system.time({
   future_map(
     c(2, 2, 2, 2),
-    ~Sys.sleep(.))
+    ~ Sys.sleep(.)
+  )
 })
 ```
 
@@ -336,16 +338,18 @@ load balanacing in `future_map`
 # without load balanacing
 system.time({
   future_map(
-    c(3, 3, 1, 1, 1, 1, 1, 1), 
-    ~Sys.sleep(.))
+    c(3, 3, 1, 1, 1, 1, 1, 1),
+    ~ Sys.sleep(.)
+  )
 })
 
 # with load balanacing
 system.time({
   future_map(
-    c(3, 3, 1, 1, 1, 1, 1, 1), 
-    ~Sys.sleep(.),
-    .options = future_options(scheduling = FALSE))
+    c(3, 3, 1, 1, 1, 1, 1, 1),
+    ~ Sys.sleep(.),
+    .options = future_options(scheduling = FALSE)
+  )
 })
 ```
 
@@ -391,7 +395,7 @@ cluster <- new_cluster(4)
 
 cluster %>% cluster_library(c("tidyverse", "nycflights13"))
 
-cluster %>% 
+cluster %>%
   cluster_assign_partition(destination = unique(flights$dest))
 
 # let's check the `destimation` variable in the workers
@@ -402,7 +406,8 @@ cluster %>% cluster_send({
   df <- flights %>% filter(dest %in% destination)
 })
 
-cluster %>% party_df("df") %>%
+cluster %>%
+  party_df("df") %>%
   group_by(dest, origin) %>%
   summarize(air_time = mean(air_time, na.rm = TRUE)) %>%
   collect()
