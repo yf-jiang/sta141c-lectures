@@ -1,5 +1,5 @@
 # module load R
-# srun -p high2 -t 1 -n 4 Rscript 05-allreduce.R
+# srun -p high2 -t 1 -n 4 Rscript 05-allgather.R
 
 suppressPackageStartupMessages({
     library(pbdMPI)

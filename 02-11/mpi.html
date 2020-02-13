@@ -362,7 +362,7 @@ summary {
 
 
 <h1 class="title toc-ignore">Distributed Computation via MPI</h1>
-<h4 class="date">02-04-2020</h4>
+<h4 class="date">02-11-2020</h4>
 
 </div>
 
@@ -384,7 +384,7 @@ summary {
 <ul>
 <li><code>Rmpi</code> could be used to execuate both master/worker type of jobs or SPMD type of jobs but there is a bug in <code>Rmpi</code> with makes <code>master/worker</code> mode fails in our cluster.</li>
 </ul></li>
-<li><code>pbdMPI</code> is a late comer (which means that it is actively maintained) and it claims that it’s fater than <code>Rmpi</code></li>
+<li><code>pbdMPI</code> is a late comer (which means that it is actively maintained) and it claims that it’s faster than <code>Rmpi</code></li>
 </ul>
 </div>
 <div id="spmd" class="section level2">
@@ -413,7 +413,7 @@ summary {
 <h2>Basic Communicator Wrangling</h2>
 <p>Managing a Communicator: Create and destroy communicators - <code>init()</code> Initialize communicator - <code>finalize()</code> shut down communicator(s) Rank query: Determine the processor’s position in the communicator - <code>comm.rank()</code> “who am I?”&quot; - <code>comm.size()</code> “how many of us are there?”&quot; - Print: printing with control over which processor prints. - <code>comm.print(x, ...)</code> - <code>comm.cat(x, ...)</code></p>
 <p>To run the script <code>01-pbdmpi.R</code></p>
-<pre class="bash"><code># make site packages such as pdbMPI available
+<pre class="bash"><code># make site packages such as pbdMPI available
 module load R
 # use 3 cores and 1 minute limit
 # high2 is a partition reserved for our class
@@ -440,6 +440,22 @@ srun -p high2 -N 2 -n 3 -t 1 Rscript 01-pbdmpi.R</code></pre>
 <li><code>pbdSapply</code> - analogue of <code>sapply()</code></li>
 </ul>
 <p>There are three modes: <code>mw</code>, <code>spmd</code> and <code>dist</code>.</p>
+</div>
+<div id="batch-submission" class="section level2">
+<h2>Batch submission</h2>
+<p>If you task takes a decent amount of time to complete, you may not want to run it directly via <code>srun</code> as any network connection issue may cause data lost. Instead, you could submit your job via <code>sbatch</code>.</p>
+<p>See <a href="02-11/batch/">02-11/batch/</a></p>
+<pre class="bash"><code># change directory to where job.sh is located
+sbatch job.sh</code></pre>
+<p>Use <code>squeue -u $USER</code> to show all your current jobs and use <code>scancel &lt;JOBID&gt;</code> to cancle your job.</p>
+</div>
+<div id="array-job" class="section level2">
+<h2>Array job</h2>
+<p>If you have a lot of tasks to be execuated but they absolutely need no communications, you could consider using an array job.</p>
+<p>See <a href="02-11/array/">02-11/array/</a></p>
+<p>You could also submit an array job via <code>sbatch</code>.</p>
+<pre class="bash"><code># change directory to where array.sh is located
+sbatch array.sh</code></pre>
 </div>
 <div id="reference" class="section level1">
 <h1>Reference:</h1>

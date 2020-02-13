@@ -3,7 +3,7 @@ title: "Distributed Computation via MPI"
 output:
   html_document: default
   pdf_document: default
-date: "02-04-2020"
+date: "02-11-2020"
 ---
 
 There are two common parallelization models in parallel programming
@@ -30,7 +30,7 @@ MPI (Message Passing Interface) is one of the most standard parallel computing a
   However it is not actively maintained now which means that `Rmpi` is not working probably with new versions of MPI (for example, >= openmpi 2.0).
   - `Rmpi` could be used to execuate both master/worker type of jobs or SPMD type of jobs but there is a bug in `Rmpi` with makes `master/worker` mode fails in our cluster.
 
-- `pbdMPI` is a late comer (which means that it is actively maintained) and it claims that it's fater than `Rmpi`
+- `pbdMPI` is a late comer (which means that it is actively maintained) and it claims that it's faster than `Rmpi`
 
 
 ## SPMD
@@ -77,7 +77,7 @@ Rank query: Determine the processor’s position in the communicator
 To run the script `01-pbdmpi.R`
 
 ```bash
-# make site packages such as pdbMPI available
+# make site packages such as pbdMPI available
 module load R
 # use 3 cores and 1 minute limit
 # high2 is a partition reserved for our class
@@ -105,6 +105,35 @@ You could press `ctrl+c` anytime to interrupt the job.
 - `pbdSapply` - analogue of `sapply()`
 
 There are three modes: `mw`, `spmd` and `dist`.
+
+## Batch submission
+
+If you task takes a decent amount of time to complete, you may not want to run it directly via `srun` as any network connection issue may cause data lost. Instead, you could submit your job via `sbatch`.
+
+
+See [02-11/batch/](02-11/batch/)
+
+```bash
+# change directory to where job.sh is located
+sbatch job.sh
+```
+
+Use `squeue -u $USER` to show all your current jobs and use `scancel <JOBID>` to cancle your job.
+
+
+## Array job
+
+If you have a lot of tasks to be execuated but they absolutely need no communications, you could consider using an array job.
+
+See [02-11/array/](02-11/array/)
+
+You could also submit an array job via `sbatch`.
+
+```bash
+# change directory to where array.sh is located
+sbatch array.sh
+```
+
 
 # Reference: 
 
