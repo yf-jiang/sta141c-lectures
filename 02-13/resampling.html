@@ -407,17 +407,18 @@ library(rsample)</code></pre>
 <div id="a-example" class="section level2">
 <h2>A example</h2>
 <pre class="r"><code>folds &lt;- vfold_cv(mtcars, 5)
-folds %&gt;% pull(splits) %&gt;% 
+folds %&gt;%
+  pull(splits) %&gt;%
   map_dbl(
-  ~ {
-    train_data &lt;- analysis(.)
-    fit &lt;- lm(mpg ~ wt, data = train_data)
-    test_data &lt;- assessment(.)
-    sqrt(mean((test_data$mpg - predict(fit, test_data))^2))
-  }
-  ) %&gt;% 
-  mean()</code></pre>
-<pre><code>## [1] 3.073947</code></pre>
+    ~ {
+      train_data &lt;- analysis(.)
+      fit &lt;- lm(mpg ~ wt, data = train_data)
+      test_data &lt;- assessment(.)
+      sum((test_data$mpg - predict(fit, test_data))^2)
+    }
+  ) %&gt;%
+  sum() / nrow(mtcars)</code></pre>
+<pre><code>## [1] 10.16069</code></pre>
 </div>
 </div>
 <div id="the-bootstrap" class="section level1">
@@ -470,8 +471,8 @@ folds %&gt;% pull(splits) %&gt;%
 </div>
 <div id="a-example-1" class="section level2">
 <h2>A example</h2>
-<pre class="r"><code>mtcars %&gt;% 
-  summarize(r = cor(mpg, hp)) %&gt;% 
+<pre class="r"><code>mtcars %&gt;%
+  summarize(r = cor(mpg, hp)) %&gt;%
   pull(r)</code></pre>
 <pre><code>## [1] -0.7761684</code></pre>
 <p>To get the “classical” confidence interval</p>
@@ -482,28 +483,71 @@ folds %&gt;% pull(splits) %&gt;%
 ##      &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;int&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;      
 ## 1   -0.776     -6.74  1.79e-7        30   -0.885    -0.586 Pearson&#39;… two.sided</code></pre>
 <p>Use bootstrap to obtain a confidence interval</p>
-<pre class="r"><code>boots &lt;- bootstraps(mtcars, times = 1000)
-se &lt;- boots %&gt;% pull(splits) %&gt;% 
+<pre class="r"><code>boots &lt;- bootstraps(mtcars, times = 1000)</code></pre>
+<p>To get the classical boostrap confidence interval</p>
+<pre class="r"><code>se &lt;- boots %&gt;%
+  pull(splits) %&gt;%
   map_dbl(
-  ~ {
-    train_data &lt;- analysis(.)
-    with(train_data, cor(mpg, hp))
-  }
-  ) %&gt;% 
+    ~ {
+      train_data &lt;- analysis(.)
+      with(train_data, cor(mpg, hp))
+    }
+  ) %&gt;%
   sd()
 
-with(mtcars, cor(mpg, hp)) + c(-1, 1) * se</code></pre>
-<pre><code>## [1] -0.8230235 -0.7293132</code></pre>
+with(mtcars, cor(mpg, hp)) + 1.96 * c(-1, 1) * se</code></pre>
+<pre><code>## [1] -0.8680726 -0.6842642</code></pre>
 </div>
-</div>
-<div id="other-uses-of-the-bootstrap" class="section level1">
-<h1>Other uses of the bootstrap</h1>
+<div id="bootstrap-percentile-confidence-interval" class="section level2">
+<h2>Bootstrap Percentile confidence interval</h2>
 <ul>
 <li>Primarily used to obtain standard errors of an estimate.</li>
 <li>Also provides approximate confidence intervals for a population parameter.</li>
 <li>Consider the 2.5th and 97.5 percentile of <span class="math inline">\(\hat \alpha^{*1},\ldots,\hat \alpha^{*B}\)</span></li>
 <li>The above interval is called a Bootstrap Percentile confidence interval. It is the simplest method (among many approaches) for obtaining a confidence interval from the bootstrap.</li>
+<li>It usually gives better results for heavily skewed distributions.</li>
 </ul>
+<pre class="r"><code>boots %&gt;%
+  pull(splits) %&gt;%
+  map_dbl(
+    ~ {
+      train_data &lt;- analysis(.)
+      with(train_data, cor(mpg, hp))
+    }
+  ) %&gt;%
+  quantile(p = c(0.025, 0.975))</code></pre>
+<pre><code>##       2.5%      97.5% 
+## -0.8737002 -0.6940197</code></pre>
+</div>
+<div id="using-parallel-to-do-bootstrap" class="section level2">
+<h2>Using <code>parallel</code> to do bootstrap</h2>
+<p>First thing first, we don’t want to use <code>bootstraps()</code> function for parallel processing because it will make deep copy of the bootstrap datasets. We will do a more primitive resampling using <code>sample.int</code>.</p>
+<pre class="r"><code>library(parallel)
+cl &lt;- makeCluster(4)</code></pre>
+<pre class="r"><code>B &lt;- 1000
+clusterEvalQ(cl, {
+  # read the data in each worker
+  data(mtcars)
+  n &lt;- nrow(mtcars)
+  NULL
+}) %&gt;% invisible()
+
+rs &lt;- parSapply(cl, seq_len(B), function(i) {
+  index &lt;- sample.int(n, n, replace = TRUE)
+  x &lt;- mtcars$mpg[index]
+  y &lt;- mtcars$hp[index]
+  cor(x, y)
+})
+
+rs %&gt;% quantile(c(0.025, 0.975))</code></pre>
+<pre><code>##       2.5%      97.5% 
+## -0.8722801 -0.6961070</code></pre>
+<pre class="r"><code>stopCluster(cl)  # stop the cluster finally</code></pre>
+</div>
+<div id="using-pbdmpi-to-do-bootstrap" class="section level2">
+<h2>Using <code>pbdMPI</code> to do bootstrap</h2>
+<p>See question 3 of assignment 4.</p>
+</div>
 </div>
 <div id="reference" class="section level1">
 <h1>Reference</h1>

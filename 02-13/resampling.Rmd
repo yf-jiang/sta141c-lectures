@@ -1,8 +1,8 @@
 ---
 title: "Resampling methods"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 date: "02-14-2020"
 ---
 
@@ -51,20 +51,21 @@ where $\hat f_{-k}(x_i)$ is the prediction of $y_i$ based on the data with part 
 
 ## A example
 
+
 ```{r}
 folds <- vfold_cv(mtcars, 5)
-folds %>% pull(splits) %>% 
+folds %>%
+  pull(splits) %>%
   map_dbl(
-  ~ {
-    train_data <- analysis(.)
-    fit <- lm(mpg ~ wt, data = train_data)
-    test_data <- assessment(.)
-    sqrt(mean((test_data$mpg - predict(fit, test_data))^2))
-  }
-  ) %>% 
-  mean()
+    ~ {
+      train_data <- analysis(.)
+      fit <- lm(mpg ~ wt, data = train_data)
+      test_data <- assessment(.)
+      sum((test_data$mpg - predict(fit, test_data))^2)
+    }
+  ) %>%
+  sum() / nrow(mtcars)
 ```
-
 
 # The Bootstrap
 
@@ -121,8 +122,8 @@ knitr::include_graphics("bootstrap_world.png")
 ## A example
 
 ```{r}
-mtcars %>% 
-  summarize(r = cor(mpg, hp)) %>% 
+mtcars %>%
+  summarize(r = cor(mpg, hp)) %>%
   pull(r)
 ```
 
@@ -137,25 +138,84 @@ Use bootstrap to obtain a confidence interval
 
 ```{r}
 boots <- bootstraps(mtcars, times = 1000)
-se <- boots %>% pull(splits) %>% 
+```
+
+To get the classical boostrap confidence interval
+
+```{r}
+se <- boots %>%
+  pull(splits) %>%
   map_dbl(
-  ~ {
-    train_data <- analysis(.)
-    with(train_data, cor(mpg, hp))
-  }
-  ) %>% 
+    ~ {
+      train_data <- analysis(.)
+      with(train_data, cor(mpg, hp))
+    }
+  ) %>%
   sd()
 
-with(mtcars, cor(mpg, hp)) + c(-1, 1) * se
+with(mtcars, cor(mpg, hp)) + 1.96 * c(-1, 1) * se
 ```
 
 
-# Other uses of the bootstrap
+## Bootstrap Percentile confidence interval
 
 - Primarily used to obtain standard errors of an estimate.
 - Also provides approximate confidence intervals for a population parameter.
 - Consider the 2.5th and 97.5 percentile of $\hat \alpha^{*1},\ldots,\hat \alpha^{*B}$
 - The above interval is called a Bootstrap Percentile confidence interval. It is the simplest method (among many approaches) for obtaining a confidence interval from the bootstrap.
+- It usually gives better results for heavily skewed  distributions.
+
+```{r}
+boots %>%
+  pull(splits) %>%
+  map_dbl(
+    ~ {
+      train_data <- analysis(.)
+      with(train_data, cor(mpg, hp))
+    }
+  ) %>%
+  quantile(p = c(0.025, 0.975))
+```
+
+
+## Using `parallel` to do bootstrap
+
+First thing first, we don't want to use `bootstraps()` function for parallel processing because it will make deep copy of the bootstrap datasets. We will do a more primitive resampling using `sample.int`.
+
+```{r}
+library(parallel)
+cl <- makeCluster(4)
+```
+
+
+```{r}
+B <- 1000
+clusterEvalQ(cl, {
+  # read the data in each worker
+  data(mtcars)
+  n <- nrow(mtcars)
+  NULL
+}) %>% invisible()
+
+rs <- parSapply(cl, seq_len(B), function(i) {
+  index <- sample.int(n, n, replace = TRUE)
+  x <- mtcars$mpg[index]
+  y <- mtcars$hp[index]
+  cor(x, y)
+})
+
+rs %>% quantile(c(0.025, 0.975))
+```
+
+```{r}
+stopCluster(cl)  # stop the cluster finally
+```
+
+
+## Using `pbdMPI` to do bootstrap
+
+
+See question 3 of assignment 4.
 
 
 # Reference
