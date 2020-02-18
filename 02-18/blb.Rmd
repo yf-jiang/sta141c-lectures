@@ -1,0 +1,182 @@
+---
+title: "Bag of little bootstraps"
+output: pdf_document
+---
+
+```{r}
+library(tidyverse)
+```
+
+## Divide and conquer a.k.a. mapreduce
+
+Divide and conquer allows a single task operation to be executed parallelly.
+
+```{r, echo = FALSE}
+DiagrammeR::grViz("mapreduce.gv", height = 200)
+```
+
+
+We have seen that in assignment 3 how we could use map and reduce to compute the mean.
+
+```{r}
+library(nycflights13)
+set.seed(141)
+m <- 10
+groups <- sample(seq_len(m), nrow(flights), replace = TRUE)
+flights_list <- flights %>% split(groups)
+```
+
+```{r}
+mean_list <- flights_list %>% map(~ mean(.$dep_delay, na.rm = TRUE))
+(mean_dep_delay <- mean_list %>% reduce(`+`) / m)
+```
+
+You may wonder if you could do the same for confidence intervals.
+```{r}
+ci_list <- flights_list %>% map(~ t.test(.$dep_delay)$conf.int)
+(mean_ci <- ci_list %>% reduce(`+`) / m)
+```
+Yeah, it gives us a result. But wait, it doesn't look right. Though the mapreduce procedure speeds up the computation, it should give similar result as if we work on the whole dataset.
+
+```{r}
+t.test(flights$dep_delay)$conf.int
+```
+
+
+*Lesson learned*: we cannot combine any statistics in the reduce step by simply taking the average. We may need to scale the statistics analytically which could be hard or impossible.
+
+# The bag of little bootstraps (BLB)
+
+It is a procedure which incorporates features of both the bootstrap and subsampling to yield a robust, computationally efficient means of assessing the quality of estimators
+
+
+```{r, echo = FALSE}
+DiagrammeR::grViz("blb.gv", height = 300)
+```
+
+- sample without replacement the sample $s$ times into sizes of $b$
+- for each subsample
+  - resample each until sample size is $n$, $r$ times
+  - compute the bootstrap statistic (e,g., the mean) for each bootstrap sample
+  - compute the statistic (e.g., confidence interval) from the bootstrap statistics
+- take the average of the statistics
+
+
+Bascially, the bag of little bootstraps = subsample + bootstrap. However, for each bootstrap, we sample $n$ from $b$ with replacement instead of sample $b$ from $b$ as in oridinary bootstrap.
+
+
+## A native (single core) implementation
+
+```{r}
+r <- 10  # r should be at least a few thousands, we are using 10 for demo
+n <- nrow(flights)
+
+each_boot <- function(i, data) {
+  mean(sample(data, n, replace = TRUE), na.rm = TRUE)
+}
+
+ci_list <- flights_list %>% map(~ {
+  sub_dep_delay <- .$dep_delay
+  map_dbl(seq_len(r), each_boot, data = sub_dep_delay) %>% 
+    quantile(c(0.025, 0.975))
+})
+
+reduce(ci_list, `+`) / length(ci_list)
+```
+
+
+The `sample` above is not memory and computationally efficient.
+
+```{r}
+# the frequency table of selecting 1000 items from 1:10 with replacement
+table(sample(1:10, 1000, replace = TRUE))
+```
+
+A more efficent way is to first generate the repeitions by multinomial distribution.
+
+```{r}
+rmultinom(1, 1000, rep(1, 10))
+```
+
+*Compute the mean with the frequencies*
+
+```{r}
+sub_dep_delay <- flights_list[[1]]$dep_delay
+# it's important to remove the missing values in this step
+sub_dep_delay <- sub_dep_delay[!is.na(sub_dep_delay)]
+freqs <- rmultinom(1, n, rep(1, length(sub_dep_delay)))
+sum(sub_dep_delay * freqs) / n
+```
+
+*Put everything back*
+
+```{r}
+r <- 10  # r should be at least a few thousands, we are using 10 for demo
+n <- nrow(flights)
+
+each_boot2 <- function(i, data) {
+  non_missing_data <- data[!is.na(data)]
+  freqs <- rmultinom(1, n, rep(1, length(non_missing_data)))
+  sum(non_missing_data * freqs) / n
+}
+
+ci_list <- flights_list %>% map(~ {
+  sub_dep_delay <- .$dep_delay
+  map_dbl(seq_len(r), each_boot2, data = sub_dep_delay) %>% 
+    quantile(c(0.025, 0.975))
+})
+
+reduce(ci_list, `+`) / length(ci_list)
+```
+
+
+## A parallel version using `furrr`.
+
+
+```{r, message = FALSE}
+library(furrr)
+plan(multiprocess, workers = 5)
+```
+
+```{r}
+ci_list <- flights_list %>% future_map(~ {
+  sub_dep_delay <- .$dep_delay
+  map_dbl(seq_len(r), each_boot2, data = sub_dep_delay) %>% 
+    quantile(c(0.025, 0.975))
+})
+reduce(ci_list, `+`) / length(ci_list)
+```
+
+
+
+A (slow) benchmark
+```{r, eval = FALSE}
+r <- 500
+naive <- function() {
+  flights_list %>% map(~ {
+    sub_dep_delay <- .$dep_delay
+    map_dbl(seq_len(r), each_boot, data = sub_dep_delay) %>% 
+      quantile(c(0.025, 0.975))
+  })
+}
+improve <- function() {
+  flights_list %>% map(~ {
+    sub_dep_delay <- .$dep_delay
+    map_dbl(seq_len(r), each_boot2, data = sub_dep_delay) %>% 
+      quantile(c(0.025, 0.975))
+  })
+}
+multi_core <- function() {
+  flights_list %>% future_map(~ {
+    sub_dep_delay <- .$dep_delay
+    map_dbl(seq_len(r), each_boot2, data = sub_dep_delay) %>% 
+      quantile(c(0.025, 0.975))
+  })
+}
+```
+
+```{r, eval = FALSE}
+# system.time(naive())  # [skipped] take forver
+system.time(improve())  # 4x seconds
+system.time(multi_core()) # 1x seconds
+```
