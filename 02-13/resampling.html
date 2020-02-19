@@ -418,7 +418,7 @@ folds %&gt;%
     }
   ) %&gt;%
   sum() / nrow(mtcars)</code></pre>
-<pre><code>## [1] 10.16069</code></pre>
+<pre><code>## [1] 10.4046</code></pre>
 </div>
 </div>
 <div id="the-bootstrap" class="section level1">
@@ -460,7 +460,7 @@ folds %&gt;%
 <li><p>we have <span class="math inline">\(B\)</span> different bootstrap data sets, <span class="math inline">\(Z^{*1},\ldots,Z^{*B}\)</span>, and <span class="math inline">\(B\)</span> corresponding <span class="math inline">\(\alpha\)</span> estimates, <span class="math inline">\(\hat \alpha^{*1},\ldots,\hat \alpha^{*B}\)</span></p></li>
 <li><p>We estimate the standard error of these bootstrap estimates using the formula <span class="math display">\[
  SE_{B}(\hat \alpha) = \sqrt{\frac{1}{B-1}\sum_{r=1}^{B} (\hat \alpha^{*r} - \bar{\hat
- \alpha}^*)}
+ \alpha}^*)^2}
 \]</span> where <span class="math inline">\(\bar{\hat \alpha}^*\)</span> is the average of <span class="math inline">\(\hat \alpha^{*r}\)</span>’s.</p></li>
 <li><p>This serves as an estimate of the standard error of <span class="math inline">\(\hat \alpha\)</span> estimated from the original data set.</p></li>
 </ul>
@@ -484,7 +484,7 @@ folds %&gt;%
 ## 1   -0.776     -6.74  1.79e-7        30   -0.885    -0.586 Pearson&#39;… two.sided</code></pre>
 <p>Use bootstrap to obtain a confidence interval</p>
 <pre class="r"><code>boots &lt;- bootstraps(mtcars, times = 1000)</code></pre>
-<p>To get the classical boostrap confidence interval</p>
+<p>Primarily used to obtain standard errors of an estimate. To get the classical boostrap confidence interval</p>
 <pre class="r"><code>se &lt;- boots %&gt;%
   pull(splits) %&gt;%
   map_dbl(
@@ -496,12 +496,11 @@ folds %&gt;%
   sd()
 
 with(mtcars, cor(mpg, hp)) + 1.96 * c(-1, 1) * se</code></pre>
-<pre><code>## [1] -0.8680726 -0.6842642</code></pre>
+<pre><code>## [1] -0.8693419 -0.6829949</code></pre>
 </div>
 <div id="bootstrap-percentile-confidence-interval" class="section level2">
 <h2>Bootstrap Percentile confidence interval</h2>
 <ul>
-<li>Primarily used to obtain standard errors of an estimate.</li>
 <li>Also provides approximate confidence intervals for a population parameter.</li>
 <li>Consider the 2.5th and 97.5 percentile of <span class="math inline">\(\hat \alpha^{*1},\ldots,\hat \alpha^{*B}\)</span></li>
 <li>The above interval is called a Bootstrap Percentile confidence interval. It is the simplest method (among many approaches) for obtaining a confidence interval from the bootstrap.</li>
@@ -517,7 +516,7 @@ with(mtcars, cor(mpg, hp)) + 1.96 * c(-1, 1) * se</code></pre>
   ) %&gt;%
   quantile(p = c(0.025, 0.975))</code></pre>
 <pre><code>##       2.5%      97.5% 
-## -0.8737002 -0.6940197</code></pre>
+## -0.8786676 -0.7000014</code></pre>
 </div>
 <div id="using-parallel-to-do-bootstrap" class="section level2">
 <h2>Using <code>parallel</code> to do bootstrap</h2>
@@ -541,7 +540,7 @@ rs &lt;- parSapply(cl, seq_len(B), function(i) {
 
 rs %&gt;% quantile(c(0.025, 0.975))</code></pre>
 <pre><code>##       2.5%      97.5% 
-## -0.8722801 -0.6961070</code></pre>
+## -0.8693764 -0.6914327</code></pre>
 <pre class="r"><code>stopCluster(cl)  # stop the cluster finally</code></pre>
 </div>
 <div id="using-pbdmpi-to-do-bootstrap" class="section level2">
