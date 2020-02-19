@@ -21,13 +21,13 @@
 | 01-16, 01-21 | [functional programming](01-16/01-16-functional.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-16/01-16-functional.html) | [pdf](01-16/01-16-functional.pdf) |
 | 01-23 | [conditions](01-23/conditions.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-23/conditions.html) | [pdf](01-23/conditions.pdf) |
 |       | [debugging](01-23/debugging.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-23/debugging.html) | [pdf](01-23/debugging.pdf) |
-| 01-28, 01-30 | [profiling](01-28/profiling.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-28/profiling.html) |  |
+| 01-28, 01-30 | [profiling](01-28/profiling.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-28/profiling.html) | [pdf](01-28/profiling.pdf) |
 |       | [Rcpp](01-28/Rcpp.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/01-28/Rcpp.html) | [pdf](01-28/Rcpp.pdf) |
 | 02-04 | [parallel](02-04/parallel.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-04/parallel.html) | [pdf](02-04/parallel.pdf) |
 | 02-06 | [shell](02-06/shell.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-06/shell.html) | [pdf](02-06/shell.pdf) |
 | 02-11 | [mpi](02-11/mpi.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-11/mpi.html) | [pdf](02-11/mpi.pdf) |
 | 02-13 | [resampling](02-13/resampling.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-13/resampling.html) | [pdf](02-13/resampling.pdf) |
-| 02-18 | [blb](02-18/blb.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-18/blb.html) | |
+| 02-18 | [blb](02-18/blb.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-18/blb.html) | [pdf](02-18/blb.pdf) |
 
 
 ## Site
