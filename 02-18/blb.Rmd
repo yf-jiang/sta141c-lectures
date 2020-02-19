@@ -65,7 +65,7 @@ DiagrammeR::grViz("blb.gv", height = 300)
 Bascially, the bag of little bootstraps = subsample + bootstrap. However, for each bootstrap, we sample $n$ from $b$ with replacement instead of sample $b$ from $b$ as in oridinary bootstrap.
 
 
-## A native (single core) implementation
+## A naive (single core) implementation
 
 ```{r}
 r <- 10  # r should be at least a few thousands, we are using 10 for demo
@@ -89,13 +89,13 @@ The `sample` above is not memory and computationally efficient.
 
 ```{r}
 # the frequency table of selecting 1000 items from 1:10 with replacement
-table(sample(1:10, 1000, replace = TRUE))
+table(sample(1:10, 100, replace = TRUE))
 ```
 
 A more efficent way is to first generate the repeitions by multinomial distribution.
 
 ```{r}
-rmultinom(1, 1000, rep(1, 10))
+rmultinom(1, 100, rep(1, 10))
 ```
 
 *Compute the mean with the frequencies*
