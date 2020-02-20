@@ -1,6 +1,9 @@
 ---
 title: "Bag of little bootstraps"
-output: pdf_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r}
@@ -19,21 +22,26 @@ DiagrammeR::grViz("mapreduce.gv", height = 200)
 We have seen that in assignment 3 how we could use map and reduce to compute the mean.
 
 ```{r}
+# we first random split `flights` into 10 files
 library(nycflights13)
 set.seed(141)
 m <- 10
 groups <- sample(seq_len(m), nrow(flights), replace = TRUE)
-flights_list <- flights %>% split(groups)
+dir.create("flights/", showWarnings = FALSE)
+for (i in seq_len(m)) {
+  write_csv(filter(flights, groups == i), str_c("flights/", i, ".csv")) 
+}
 ```
 
-```{r}
-mean_list <- flights_list %>% map(~ mean(.$dep_delay, na.rm = TRUE))
+```{r, message = FALSE}
+file_names <- file.path("flights", list.files("flights"))
+mean_list <- file_names %>% map(~ mean(read_csv(.)$dep_delay, na.rm = TRUE))
 (mean_dep_delay <- mean_list %>% reduce(`+`) / m)
 ```
 
 You may wonder if you could do the same for confidence intervals.
-```{r}
-ci_list <- flights_list %>% map(~ t.test(.$dep_delay)$conf.int)
+```{r, message = FALSE}
+ci_list <- file_names %>% map(~ t.test(read_csv(.)$dep_delay)$conf.int)
 (mean_ci <- ci_list %>% reduce(`+`) / m)
 ```
 Yeah, it gives us a result. But wait, it doesn't look right. Though the mapreduce procedure speeds up the computation, it should give similar result as if we work on the whole dataset.
@@ -67,7 +75,7 @@ Bascially, the bag of little bootstraps = subsample + bootstrap. However, for ea
 
 ## A naive (single core) implementation
 
-```{r}
+```{r, message = FALSE}
 r <- 10  # r should be at least a few thousands, we are using 10 for demo
 n <- nrow(flights)
 
@@ -75,8 +83,8 @@ each_boot <- function(i, data) {
   mean(sample(data, n, replace = TRUE), na.rm = TRUE)
 }
 
-ci_list <- flights_list %>% map(~ {
-  sub_dep_delay <- .$dep_delay
+ci_list <- file_names %>% map(~ {
+  sub_dep_delay <- read_csv(.)$dep_delay
   map_dbl(seq_len(r), each_boot, data = sub_dep_delay) %>% 
     quantile(c(0.025, 0.975))
 })
@@ -100,8 +108,8 @@ rmultinom(1, 100, rep(1, 10))
 
 *Compute the mean with the frequencies*
 
-```{r}
-sub_dep_delay <- flights_list[[1]]$dep_delay
+```{r, message = FALSE}
+sub_dep_delay <- read_csv(file_names[1])$dep_delay
 # it's important to remove the missing values in this step
 sub_dep_delay <- sub_dep_delay[!is.na(sub_dep_delay)]
 freqs <- rmultinom(1, n, rep(1, length(sub_dep_delay)))
@@ -110,7 +118,7 @@ sum(sub_dep_delay * freqs) / n
 
 *Put everything back*
 
-```{r}
+```{r, message = FALSE}
 r <- 10  # r should be at least a few thousands, we are using 10 for demo
 n <- nrow(flights)
 
@@ -120,8 +128,8 @@ each_boot2 <- function(i, data) {
   sum(non_missing_data * freqs) / n
 }
 
-ci_list <- flights_list %>% map(~ {
-  sub_dep_delay <- .$dep_delay
+ci_list <- file_names %>% map(~ {
+  sub_dep_delay <- read_csv(.)$dep_delay
   map_dbl(seq_len(r), each_boot2, data = sub_dep_delay) %>% 
     quantile(c(0.025, 0.975))
 })
@@ -138,45 +146,73 @@ library(furrr)
 plan(multiprocess, workers = 5)
 ```
 
-```{r}
-ci_list <- flights_list %>% future_map(~ {
-  sub_dep_delay <- .$dep_delay
+```{r, message = FALSE}
+ci_list <- file_names %>% future_map(~ {
+  sub_dep_delay <- read_csv(.)$dep_delay
   map_dbl(seq_len(r), each_boot2, data = sub_dep_delay) %>% 
     quantile(c(0.025, 0.975))
 })
 reduce(ci_list, `+`) / length(ci_list)
 ```
 
+Of course, it is in gerernal be a better idea to read the data in the workers than sending the data from master to the workers.
 
 
-A (slow) benchmark
+
+## Comparsion
+
+
 ```{r, eval = FALSE}
 r <- 500
 naive <- function() {
-  flights_list %>% map(~ {
-    sub_dep_delay <- .$dep_delay
+  file_names %>% map(~ {
+    sub_dep_delay <- read_csv(.)$dep_delay
     map_dbl(seq_len(r), each_boot, data = sub_dep_delay) %>% 
       quantile(c(0.025, 0.975))
   })
 }
 improve <- function() {
-  flights_list %>% map(~ {
-    sub_dep_delay <- .$dep_delay
+  file_names %>% map(~ {
+    sub_dep_delay <- read_csv(.)$dep_delay
     map_dbl(seq_len(r), each_boot2, data = sub_dep_delay) %>% 
       quantile(c(0.025, 0.975))
   })
 }
 multi_core <- function() {
-  flights_list %>% future_map(~ {
-    sub_dep_delay <- .$dep_delay
+  file_names %>% future_map(~ {
+    sub_dep_delay <- read_csv(.)$dep_delay
     map_dbl(seq_len(r), each_boot2, data = sub_dep_delay) %>% 
       quantile(c(0.025, 0.975))
   })
 }
 ```
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, message = FALSE}
 # system.time(naive())  # [skipped] take forver
 system.time(improve())  # 4x seconds
 system.time(multi_core()) # 1x seconds
 ```
+
+
+# Another example
+
+We want to compute a confidence interval between the correlation of `dep_delay` and `arr_delay`
+
+```{r, message = FALSE}
+r <- 10
+
+boot_lm <- function(i, data) {
+  # this function bootstrap data and computet the correlation
+}
+```
+```{r, eval = FALSE}
+ci_list<- file_names %>% future_map(~ {
+  data <- read_csv(.) %>%
+    drop_na(arr_delay, dep_delay)
+  map_dbl(seq_len(r), boot_lm, data = data) %>% 
+    quantile(c(0.025, 0.975))
+})
+
+reduce(ci_list, `+`) / length(ci_list)
+```
+
