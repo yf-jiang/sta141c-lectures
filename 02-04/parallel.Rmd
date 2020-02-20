@@ -1,8 +1,8 @@
 ---
 title: "Parallel Computation"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 date: "02-04-2020"
 ---
 
@@ -228,6 +228,21 @@ clusterEvalQ(cl, {
 })
 ```
 
+Note: if you use `clusterExport` inside a function, you may want to specify the `envir` parameter.
+
+```{r}
+doCalc <- function() {
+  z <- 5
+  # export z from the current scope
+  clusterExport(cl, "z", envir = environment())
+  clusterEvalQ(cl, {
+    z + 1
+  })
+}
+doCalc()
+```
+
+
 
 If you want to set a random seed, the following doesn't work because each work returns the same result.
 
@@ -260,7 +275,7 @@ stopCluster(cl)
 
 ## Another pouplar package: `foreach`
 
-As we have seen a bit earlier, we might need to use `clusterExport` to export certain gloabl variables. It would be a bit cumbersome. To reduce the extra steps, we could consider `foreach` and `doParallel`. They will send all the globals to the workers before running the tasks.
+As we have seen a bit earlier, we might need to use `clusterExport` to export certain gloabl variables. It would be a bit cumbersome. To reduce the extra steps, we could consider `foreach` and `doParallel`. They will send all the globals to the workers before running the tasks. (However, I don't personally recommand `foreach` though it is (was!?) popular, I perfer `furrr` in the below)
 
 ```{r}
 library(foreach)
@@ -310,6 +325,7 @@ system.time({
 ### package `furrr`
 
 `furrr` provides functions which are very similar to those in `purrr`.
+One nice thing about `furrr` is that it doesn't send absolutely every global variables to the workers as `foreach` and `mclapply`. It does lexical analysis to deduce what objects are needed and only transfer them to the workers. It also loads libraries automatically in the workers.
 
 ```{r}
 library(furrr)
