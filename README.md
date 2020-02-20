@@ -28,6 +28,8 @@
 | 02-11 | [mpi](02-11/mpi.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-11/mpi.html) | [pdf](02-11/mpi.pdf) |
 | 02-13 | [resampling](02-13/resampling.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-13/resampling.html) | [pdf](02-13/resampling.pdf) |
 | 02-18 | [blb](02-18/blb.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-18/blb.html) | [pdf](02-18/blb.pdf) |
+| 02-20 | [random forest](02-20/random_forest.Rmd) | [html](https://ucdavis-sta-141c-winter-2020.github.io/sta141c-lectures/02-20/random_forest.html) | [pdf](02-20/tree.pdf) |
+|  | random forest slides |  | [pdf](02-20/old_slides.pdf) |
 
 
 ## Site
