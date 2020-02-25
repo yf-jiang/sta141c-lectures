@@ -112,7 +112,7 @@ SELECT * FROM `adept-vigil-269305.mydataset.mtcars` WHERE `mpg` < 30;
 # Running linear regression in Bigquery
 
 ```{sql connection = con, eval = FALSE}
-CREATE VIEW `mydataset.mtcars2` AS
+CREATE TABLE `mydataset.mtcars2` AS
   SELECT *,
   RAND() as `train`
   FROM `adept-vigil-269305.mydataset.mtcars`
