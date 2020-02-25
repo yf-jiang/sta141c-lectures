@@ -1,0 +1,161 @@
+---
+title: "Bigquery"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+
+```{r}
+library(bigrquery)
+library(tidyverse)
+```
+
+When using bigrquery interactively, you’ll be prompted to authorize bigrquery in the browser. 
+
+- login the Google Cloud Platform
+- create a new project
+- enable BigQuery API
+- add public data
+
+
+```{r, eval = FALSE}
+bigrquery::bq_auth().
+```
+
+```{r, cache = TRUE}
+# replace it with your project id
+project <- "adept-vigil-269305"
+result <- bq_project_query(
+  project,
+  "SELECT * FROM `bigquery-public-data.samples.gsod` LIMIT 100;")
+```
+
+```{r, cache = TRUE}
+bq_table_download(result)
+```
+
+
+# Upload dataset
+
+You could upload via the web interface or using `bq_` functions.
+
+
+```{r, eval = FALSE}
+mydataset <- bq_dataset(project, "mydataset")
+bq_dataset_create(mydataset)
+bq_dataset_exists(mydataset)
+```
+
+Let's try to upload the `mtcars` dataset and pretend that it is huge.
+
+
+```{r, eval = FALSE}
+ta <- bq_table(mydataset, "mtcars")
+bq_table_create(
+  ta,
+  friendly_name = "Motor Trend Car Road Tests",
+  description = "The data was extracted from the 1974 Motor Trend US magazine",
+  labels = list(category = "example")
+)
+bq_table_exists(ta)
+
+cars <- mtcars %>% 
+  mutate(cyl = as_factor(cyl), vs = as_factor(vs), am = as_factor(am))
+bq_table_upload(ta, cars, fields = as_bq_fields(cars))
+```
+
+Now, let's have some fun.
+
+There are three interfaces provided by `bigrquery`.
+- Low level API overy REST
+- DBI
+- dplyr
+
+
+*bq_*
+```{r}
+result <- bq_project_query(
+  project,
+  "SELECT * FROM `adept-vigil-269305.mydataset.mtcars` where `mpg` < 30")
+bq_table_download(result)
+```
+
+```{r}
+library(DBI)
+con <- dbConnect(
+  bigquery(),
+  project = project,
+  dataset = "mydataset"
+)
+```
+
+*DBI*
+```{r}
+con %>% dbGetQuery("SELECT * FROM `adept-vigil-269305.mydataset.mtcars` WHERE `mpg` < 30")
+```
+
+*dplyr*
+```{r}
+con %>% tbl("mtcars") %>% 
+  filter(mpg < 30) %>% 
+  collect()
+```
+
+
+```{sql connection = con}
+SELECT * FROM `adept-vigil-269305.mydataset.mtcars` WHERE `mpg` < 30;
+```
+
+
+# Running linear regression in Bigquery
+
+```{sql connection = con, eval = FALSE}
+CREATE VIEW `mydataset.mtcars2` AS
+  SELECT *,
+  RAND() as `train`
+  FROM `adept-vigil-269305.mydataset.mtcars`
+```
+
+
+
+```{sql connection = con, eval = FALSE}
+CREATE MODEL `mydataset.mtcars_model`
+OPTIONS
+  (model_type='linear_reg',
+    input_label_cols=['mpg']) AS
+SELECT
+  `mpg`,
+  `cyl`,
+  `disp`,
+  `hp`,
+  CAST(`gear` AS string) AS `gear`
+FROM
+  `adept-vigil-269305.mydataset.mtcars2`
+WHERE
+  `train` < 0.9  -- select rows randomly
+```
+
+If you want to delete the model
+```{sql connection = con, eval = FALSE}
+DROP MODEL `mydataset.mtcars_model`;
+```
+
+To do prediction
+
+```{sql connection = con, eval = FALSE}
+SELECT * FROM ML.PREDICT(MODEL `adept-vigil-269305.mydataset.mtcars_model`, (
+  SELECT
+    `cyl`,
+    `disp`,
+    `hp`,
+    CAST(`gear` AS string) AS `gear`
+  FROM `adept-vigil-269305.mydataset.mtcars2` WHERE `train` >= 0.9
+))
+```
+
+
+# Reference
+
+BigQuery: https://cloud.google.com/bigquery-ml/docs/reference/standard-sql
