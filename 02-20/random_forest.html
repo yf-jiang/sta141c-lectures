@@ -1706,7 +1706,7 @@ probs &lt;- map_dbl(seq_len(r), function(i) {
   # we only need the probabliy of spam, because the sum of the two values is always 1
   predict(tree_spam_boot, new_data)[2]
 })</code></pre>
-<p>There are two ways to yield the final predicted class, either by consensus or by averaging probablies. Either way, we need the baseline,</p>
+<p>There are two ways to yield the final predicted class, either by consensus or by averaging probablies. Either way, we need a baseline to compare with - using the prior proportion as the baseline is a simplest way (though may not be the best way). One may also use CV to select the baseline.</p>
 <pre class="r"><code>(baseline &lt;- mean(spam$type == &quot;spam&quot;))</code></pre>
 <pre><code>## [1] 0.3940448</code></pre>
 <div id="consensus" class="section level3">
