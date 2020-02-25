@@ -205,6 +205,7 @@ boot_lm <- function(i, data) {
   # this function bootstrap data and computet the correlation
 }
 ```
+
 ```{r, eval = FALSE}
 ci_list<- file_names %>% future_map(~ {
   data <- read_csv(.) %>%
@@ -215,4 +216,3 @@ ci_list<- file_names %>% future_map(~ {
 
 reduce(ci_list, `+`) / length(ci_list)
 ```
-
