@@ -1,9 +1,9 @@
 ---
 title: "Random Forest"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 ```{r}
@@ -34,7 +34,7 @@ text(tree_spam, pretty = 1, all = TRUE, cex = 0.7)
 
 In R, there are packages like `randomForest` and `ranger` to perform random forest. However, we want to implement it from scratch.
 
-The main idea bebind random forest is to resampling the dataset by sampling the row with replacement and selecting the columns randomly.
+The main idea bebind random forest is to resample the dataset by sampling the row with replacement and selecting the columns randomly.
 
 
 For the `spam` data, suppose we want to predict the class of a random observation.
@@ -61,7 +61,7 @@ n <- nrow(spam)
 all_col_names <- names(spam)[1:57]  # skip "type"
 
 probs <- map_dbl(seq_len(r), function(i) {
-  col_names <- c("type", sample(all_col_names, 8))
+  col_names <- c("type", sample(all_col_names, m))
   spam_boot <- spam[sample(n, n, replace = TRUE), col_names]
   tree_spam_boot <- tree(type ~ ., spam_boot)
   # we only need the probabliy of spam, because the sum of the two values is always 1
@@ -95,4 +95,19 @@ The average probabliy acress all trees is 0.45 > baseline so the predicted class
 
 
 In general, it is more stable to use average probability rather than consensus.
+
+
+# Confidence interval
+
+To construst a CI, you may be thinking of
+
+```{r}
+quantile(probs, c(0.025, 0.975))
+```
+
+This confidence interval is essentially the bootstrap percentile interval for a tree model which randomly selects $m$ predictors. It is not very reliable because the sampling of the columns introduces extra variability. 
+
+A correct way is to make use of the Jackknife, see https://arxiv.org/pdf/1311.4555.pdf
+
+Well, it is too hard!? Use the package `ranger`!
 
