@@ -198,19 +198,35 @@ system.time(multi_core()) # 1x seconds
 
 We want to compute a confidence interval between the correlation of `dep_delay` and `arr_delay`
 
-```{r, message = FALSE}
-r <- 10
+```{r}
+cor.test(flights$dep_delay, flights$arr_delay)
+```
 
-boot_lm <- function(i, data) {
-  # this function bootstrap data and computet the correlation
+
+```{r, message = FALSE}
+r <- 100  # in practice, r shoule be at least 1000 - 10000
+
+boot_cor <- function(i, data) {
+  # this function bootstrap data and compute the correlation
+  b <- nrow(data)
+  weights <- rmultinom(1, n, rep(1, b))
+  x <- data$arr_delay
+  y <- data$dep_delay
+  mux <- sum(weights * x) / n
+  muy <- sum(weights * y) / n
+  sxx <- sum(weights * (x - mux)^2)
+  syy <- sum(weights * (y - muy)^2)
+  sxy <- sum(weights * (y - muy) * (x - mux))
+  sxy / sqrt(sxx * syy)
 }
 ```
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, message = FALSE
 ci_list<- file_names %>% future_map(~ {
   data <- read_csv(.) %>%
-    drop_na(arr_delay, dep_delay)
-  map_dbl(seq_len(r), boot_lm, data = data) %>% 
+    select(arr_delay, dep_delay) %>% 
+    drop_na()
+  map_dbl(seq_len(r), boot_cor, data = data) %>% 
     quantile(c(0.025, 0.975))
 })
 

@@ -22,7 +22,7 @@ You also also submit your perference to the google form: https://forms.gle/xHf4B
 - Write a report of 5 to 10 pages
 - state clear the source of the datasets and briefly describe it
 - describe the statistic procedure for which you want to apply bag of little bootstraps
-- you could use any statistic the as long as they are correctly applied to the data
+- you could use any statistical procedures as long as they are correctly applied to the data
 - explain and illustrate why BLB is needed in your analysis
 - you are expected to make use of parallel processing or distributed computing (if you do not need them, it means your data size is too small)
 - you could write Rcpp code to speed up some operations
@@ -47,3 +47,20 @@ In the last week, your group will be given a chance to show your work to the cla
 
 Details for the presentation and submission will be announced later.
 
+
+
+## Project Update (2/25)
+
+- I hope that you have already started talking about the project.
+- On Mar 10 or 12, each group will be given about 10 minutes to present 
+- Indicate your choice on https://forms.gle/9hBdayJT2YVV1fze7 (each group only enters once)
+- The presentation is not mandatory. Though, you could use this opportunity to show your work and get feedback from the class and me. I understand the work may not be completed at the time of the presentation (and that's why you need feedback). Also, note that it is not a disadvantage to present earlier on 3/12 because it means that your group has more time to implement the feedback.
+
+- The due date for the project is 3/20 (though I encourage you to finish it soon).
+
+
+## Some guidelines for the final project
+
+
+- Statistical correctness. 
+- Good group collaboration. I recommand you to create a github organization and house the source code under the organization. You might also have to make good use of features like "Issues" and "Pull requests".
